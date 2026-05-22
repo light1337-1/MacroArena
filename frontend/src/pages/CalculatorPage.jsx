@@ -1,0 +1,1 @@
+// Calculator page (architecture stub)

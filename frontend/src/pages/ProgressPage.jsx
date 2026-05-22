@@ -1,0 +1,1 @@
+// Progress page (architecture stub)
