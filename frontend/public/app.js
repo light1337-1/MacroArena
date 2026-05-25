@@ -37,28 +37,37 @@ const sportLabels = {
   cycling: "Велоспорт",
 };
 
-const athleteData = [
-  { age: 18, gender: "male", height: 178, weight: 72, sport: "football", trainingDays: 4, activityLevel: "high", goal: "maintenance", averageCalories: 2950, protein: 145, fat: 82, carbs: 390 },
-  { age: 21, gender: "male", height: 182, weight: 78, sport: "football", trainingDays: 5, activityLevel: "high", goal: "gain", averageCalories: 3350, protein: 165, fat: 95, carbs: 455 },
-  { age: 19, gender: "female", height: 168, weight: 61, sport: "football", trainingDays: 3, activityLevel: "medium", goal: "loss", averageCalories: 2150, protein: 118, fat: 58, carbs: 285 },
-  { age: 20, gender: "male", height: 176, weight: 70, sport: "boxing", trainingDays: 5, activityLevel: "very_high", goal: "maintenance", averageCalories: 3100, protein: 154, fat: 86, carbs: 415 },
-  { age: 23, gender: "male", height: 180, weight: 76, sport: "boxing", trainingDays: 6, activityLevel: "very_high", goal: "loss", averageCalories: 2850, protein: 170, fat: 74, carbs: 355 },
-  { age: 18, gender: "female", height: 164, weight: 57, sport: "boxing", trainingDays: 4, activityLevel: "high", goal: "maintenance", averageCalories: 2300, protein: 120, fat: 64, carbs: 300 },
-  { age: 22, gender: "male", height: 175, weight: 68, sport: "running", trainingDays: 4, activityLevel: "medium", goal: "loss", averageCalories: 2350, protein: 135, fat: 62, carbs: 310 },
-  { age: 20, gender: "female", height: 166, weight: 58, sport: "running", trainingDays: 3, activityLevel: "medium", goal: "maintenance", averageCalories: 2100, protein: 110, fat: 58, carbs: 275 },
-  { age: 24, gender: "male", height: 183, weight: 80, sport: "running", trainingDays: 5, activityLevel: "high", goal: "maintenance", averageCalories: 3000, protein: 150, fat: 83, carbs: 400 },
-  { age: 19, gender: "male", height: 181, weight: 74, sport: "swimming", trainingDays: 4, activityLevel: "high", goal: "maintenance", averageCalories: 2850, protein: 148, fat: 78, carbs: 375 },
-  { age: 21, gender: "female", height: 170, weight: 63, sport: "swimming", trainingDays: 4, activityLevel: "high", goal: "loss", averageCalories: 2250, protein: 126, fat: 60, carbs: 285 },
-  { age: 25, gender: "male", height: 185, weight: 84, sport: "swimming", trainingDays: 5, activityLevel: "very_high", goal: "gain", averageCalories: 3500, protein: 180, fat: 98, carbs: 465 },
-  { age: 18, gender: "male", height: 172, weight: 66, sport: "fitness", trainingDays: 3, activityLevel: "medium", goal: "gain", averageCalories: 2800, protein: 145, fat: 78, carbs: 355 },
-  { age: 22, gender: "female", height: 167, weight: 60, sport: "fitness", trainingDays: 4, activityLevel: "medium", goal: "maintenance", averageCalories: 2200, protein: 118, fat: 61, carbs: 285 },
-  { age: 24, gender: "male", height: 179, weight: 82, sport: "fitness", trainingDays: 5, activityLevel: "high", goal: "loss", averageCalories: 2750, protein: 175, fat: 72, carbs: 330 },
-  { age: 19, gender: "male", height: 188, weight: 83, sport: "basketball", trainingDays: 4, activityLevel: "high", goal: "maintenance", averageCalories: 3150, protein: 160, fat: 88, carbs: 420 },
-  { age: 21, gender: "female", height: 174, weight: 66, sport: "basketball", trainingDays: 4, activityLevel: "high", goal: "maintenance", averageCalories: 2450, protein: 128, fat: 68, carbs: 320 },
-  { age: 23, gender: "male", height: 190, weight: 88, sport: "basketball", trainingDays: 5, activityLevel: "very_high", goal: "gain", averageCalories: 3700, protein: 185, fat: 104, carbs: 490 },
-  { age: 22, gender: "male", height: 177, weight: 71, sport: "cycling", trainingDays: 5, activityLevel: "high", goal: "maintenance", averageCalories: 3200, protein: 148, fat: 90, carbs: 435 },
-  { age: 26, gender: "female", height: 169, weight: 62, sport: "cycling", trainingDays: 4, activityLevel: "high", goal: "loss", averageCalories: 2350, protein: 125, fat: 62, carbs: 305 },
-  { age: 24, gender: "male", height: 184, weight: 79, sport: "cycling", trainingDays: 6, activityLevel: "very_high", goal: "gain", averageCalories: 3750, protein: 172, fat: 105, carbs: 505 },
+const sportProfiles = [
+  { sport: "football", durationBase: 85, intensity: 1.06 },
+  { sport: "boxing", durationBase: 75, intensity: 1.12 },
+  { sport: "running", durationBase: 60, intensity: 1 },
+  { sport: "swimming", durationBase: 80, intensity: 1.08 },
+  { sport: "fitness", durationBase: 70, intensity: 1.03 },
+  { sport: "basketball", durationBase: 90, intensity: 1.09 },
+  { sport: "cycling", durationBase: 100, intensity: 1.11 },
+];
+
+const bodyTemplates = {
+  male: [
+    { height: 170, weight: 64 },
+    { height: 176, weight: 70 },
+    { height: 182, weight: 78 },
+    { height: 188, weight: 87 },
+  ],
+  female: [
+    { height: 160, weight: 52 },
+    { height: 166, weight: 58 },
+    { height: 172, weight: 65 },
+    { height: 178, weight: 72 },
+  ],
+};
+
+const ageBands = [16, 19, 22, 26, 31, 37];
+const bodyVariants = [
+  { height: -3, weight: -5 },
+  { height: 0, weight: 0 },
+  { height: 3, weight: 5 },
+  { height: 6, weight: 9 },
 ];
 
 function getJson(key, fallback) {
@@ -79,6 +88,19 @@ function setText(id, value) {
 
 function round(value) {
   return Math.round(value);
+}
+
+function formatSigned(value) {
+  return `${value > 0 ? "+" : ""}${value}`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function collectFormValues() {
@@ -140,27 +162,93 @@ function calculateNutrition(values) {
   };
 }
 
+function calculateBmi(values) {
+  return values.weight / (values.height / 100) ** 2;
+}
+
+function generateAthleteDataset() {
+  const profiles = [];
+  let id = 1;
+
+  sportProfiles.forEach((sportProfile, sportIndex) => {
+    ["male", "female"].forEach((gender) => {
+      Object.keys(goalLabels).forEach((goal) => {
+        Object.keys(activityFactors).forEach((activityLevel) => {
+          ageBands.forEach((ageBase, ageIndex) => {
+            bodyTemplates[gender].forEach((template, templateIndex) => {
+              bodyVariants.forEach((variant, variantIndex) => {
+                const age = ageBase + ((sportIndex + templateIndex + variantIndex) % 3);
+                const trainingDaysBase = { low: 2, medium: 3, high: 5, very_high: 6 }[activityLevel];
+                const trainingDays = Math.min(7, Math.max(1, trainingDaysBase + ((sportIndex + variantIndex) % 2)));
+                const trainingDuration = sportProfile.durationBase + ageIndex * 3 + variantIndex * 5;
+                const height = template.height + variant.height + (sportIndex % 3) - 1;
+                const goalWeightDelta = goal === "gain" ? 3 : goal === "loss" ? -2 : 0;
+                const weight = template.weight + variant.weight + ageIndex * 1.4 + goalWeightDelta;
+                const rawProfile = {
+                  id,
+                  age,
+                  gender,
+                  height: Number(height.toFixed(1)),
+                  weight: Number(weight.toFixed(1)),
+                  sport: sportProfile.sport,
+                  trainingDays,
+                  trainingDuration,
+                  activityLevel,
+                  goal,
+                };
+                const nutrition = calculateNutrition(rawProfile);
+                const calories = round(nutrition.targetCalories * sportProfile.intensity + (variantIndex - 1.5) * 45);
+                const protein = round(goal === "loss" ? rawProfile.weight * 2.25 : rawProfile.weight * 2.05);
+                const fat = round(rawProfile.weight * (goal === "gain" ? 1 : 0.85));
+                const carbs = round(Math.max(80, (calories - protein * 4 - fat * 9) / 4));
+
+                profiles.push({
+                  ...rawProfile,
+                  averageCalories: calories,
+                  protein,
+                  fat,
+                  carbs,
+                  bmi: Number(calculateBmi(rawProfile).toFixed(1)),
+                  experienceYears: Math.max(1, round((age - 14) / 2 + trainingDays / 2)),
+                });
+
+                id += 1;
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
+  return profiles;
+}
+
+const athleteData = generateAthleteDataset();
+
 function scoreAthlete(values, athlete) {
-  let score = 0;
+  const userBmi = calculateBmi(values);
+  const exactScore =
+    (athlete.sport === values.sport ? 24 : 0) +
+    (athlete.goal === values.goal ? 16 : 0) +
+    (athlete.gender === values.gender ? 10 : 0) +
+    (athlete.activityLevel === values.activityLevel ? 8 : 0);
+  const numericScore =
+    Math.max(0, 1 - Math.abs(athlete.age - values.age) / 18) * 10 +
+    Math.max(0, 1 - Math.abs(athlete.weight - values.weight) / 28) * 10 +
+    Math.max(0, 1 - Math.abs(athlete.height - values.height) / 30) * 7 +
+    Math.max(0, 1 - Math.abs(athlete.trainingDays - values.trainingDays) / 6) * 6 +
+    Math.max(0, 1 - Math.abs(athlete.trainingDuration - values.trainingDuration) / 100) * 5 +
+    Math.max(0, 1 - Math.abs(athlete.bmi - userBmi) / 8) * 4;
 
-  if (athlete.sport === values.sport) score += 5;
-  if (athlete.goal === values.goal) score += 3;
-  if (athlete.gender === values.gender) score += 2;
-  if (athlete.activityLevel === values.activityLevel) score += 2;
-
-  score -= Math.abs(athlete.age - values.age) / 8;
-  score -= Math.abs(athlete.weight - values.weight) / 12;
-  score -= Math.abs(athlete.height - values.height) / 18;
-  score -= Math.abs(athlete.trainingDays - values.trainingDays) / 3;
-
-  return score;
+  return Math.max(0, Math.min(100, round(exactScore + numericScore)));
 }
 
 function getSimilarAthletes(values) {
   return athleteData
     .map((athlete) => ({ ...athlete, score: scoreAthlete(values, athlete) }))
     .sort((a, b) => b.score - a.score)
-    .slice(0, 6);
+    .slice(0, 30);
 }
 
 function average(items, key) {
@@ -169,6 +257,55 @@ function average(items, key) {
   }
 
   return items.reduce((sum, item) => sum + item[key], 0) / items.length;
+}
+
+function median(items, key) {
+  if (!items.length) {
+    return 0;
+  }
+
+  const values = items.map((item) => item[key]).sort((a, b) => a - b);
+  const middle = Math.floor(values.length / 2);
+
+  return values.length % 2 ? values[middle] : (values[middle - 1] + values[middle]) / 2;
+}
+
+function percentile(items, key, value) {
+  if (!items.length) {
+    return 0;
+  }
+
+  const lowerOrEqual = items.filter((item) => item[key] <= value).length;
+  return round((lowerOrEqual / items.length) * 100);
+}
+
+function getRange(items, key) {
+  const values = items.map((item) => item[key]);
+
+  return {
+    min: Math.min(...values),
+    max: Math.max(...values),
+  };
+}
+
+function buildComparison(values, nutrition, similarAthletes) {
+  const averageCalories = round(average(similarAthletes, "averageCalories"));
+  const medianCalories = round(median(similarAthletes, "averageCalories"));
+  const calorieRange = getRange(similarAthletes, "averageCalories");
+  const difference = nutrition.targetCalories - averageCalories;
+  const percentileValue = percentile(similarAthletes, "averageCalories", nutrition.targetCalories);
+  const averageScore = round(average(similarAthletes, "score"));
+
+  return {
+    averageCalories,
+    medianCalories,
+    calorieRange,
+    difference,
+    percentileValue,
+    averageScore,
+    averageWeight: round(average(similarAthletes, "weight")),
+    averageHeight: round(average(similarAthletes, "height")),
+  };
 }
 
 function buildInsight(values, nutrition, difference) {
@@ -226,10 +363,32 @@ function drawMacroChart(nutrition) {
   ctx.fillText("ккал", 160, 140);
 }
 
+function renderSimilarProfiles(profiles) {
+  const container = document.querySelector("#similarProfiles");
+
+  if (!container) return;
+
+  if (!profiles.length) {
+    container.innerHTML = "<p>Ұқсас профиль табылмады.</p>";
+    return;
+  }
+
+  container.innerHTML = profiles
+    .map((profile) => `
+      <article>
+        <span class="profile-score">${profile.score}/100 match</span>
+        <strong>${sportLabels[profile.sport]} · ${goalLabels[profile.goal]}</strong>
+        <p>${profile.age} жас, ${profile.gender === "male" ? "ер" : "әйел"}, ${profile.height} см, ${profile.weight} кг</p>
+        <p>${activityLabels[profile.activityLevel]}, аптасына ${profile.trainingDays} жаттығу, ${profile.trainingDuration} мин</p>
+        <p>${profile.averageCalories} ккал · ${profile.protein}г/${profile.fat}г/${profile.carbs}г</p>
+      </article>
+    `)
+    .join("");
+}
+
 function renderResults(payload) {
   const { values, nutrition, similarAthletes } = payload;
-  const averageCalories = round(average(similarAthletes, "averageCalories"));
-  const difference = nutrition.targetCalories - averageCalories;
+  const comparison = buildComparison(values, nutrition, similarAthletes);
 
   setText("heroCalories", nutrition.targetCalories);
   setText("heroGoal", goalLabels[values.goal]);
@@ -247,17 +406,23 @@ function renderResults(payload) {
   setText("targetCalories", `${nutrition.targetCalories} ккал`);
   setText("activityFactor", `${nutrition.activityFactor}`);
   setText("goalTitle", `${sportLabels[values.sport]} / ${goalLabels[values.goal]}`);
-  setText("resultSummary", `${values.name}, сіздің күндік мақсат: ${nutrition.targetCalories} ккал. БЖУ: ${nutrition.protein}г / ${nutrition.fat}г / ${nutrition.carbs}г.`);
-  setText("goalInsight", buildInsight(values, nutrition, difference));
+  setText("resultSummary", `${values.name}, сіздің күндік мақсат: ${nutrition.targetCalories} ккал. БЖУ: ${nutrition.protein}г / ${nutrition.fat}г / ${nutrition.carbs}г. Салыстыру ${athleteData.length} профильден таңдалған топ-30 бойынша жасалды.`);
+  setText("goalInsight", buildInsight(values, nutrition, comparison.difference));
 
-  setText("similarCount", `${similarAthletes.length}`);
-  setText("averageWeight", `${round(average(similarAthletes, "weight"))} кг`);
-  setText("averageHeight", `${round(average(similarAthletes, "height"))} см`);
-  setText("averageCalories", `${averageCalories} ккал`);
-  setText("calorieDifference", `${difference > 0 ? "+" : ""}${difference} ккал`);
-  setText("comparisonSummary", `Ұқсас спортшылардың орташа калориясы ${averageCalories} ккал. Сіздің айырмашылығыңыз: ${difference > 0 ? "+" : ""}${difference} ккал.`);
+  setText("datasetSize", `${athleteData.length} профиль`);
+  setText("similarCount", `${similarAthletes.length} профиль`);
+  setText("matchQuality", `${comparison.averageScore}/100`);
+  setText("calorieRange", `${comparison.calorieRange.min}-${comparison.calorieRange.max} ккал`);
+  setText("averageWeight", `${comparison.averageWeight} кг`);
+  setText("averageHeight", `${comparison.averageHeight} см`);
+  setText("averageCalories", `${comparison.averageCalories} ккал`);
+  setText("calorieDifference", `${formatSigned(comparison.difference)} ккал`);
+  setText("caloriePercentile", `${comparison.percentileValue}%`);
+  setText("comparisonSummary", `Датасетте ${athleteData.length} спортшы профилі бар. Топ-30 ұқсас профильдің орташа калориясы ${comparison.averageCalories} ккал, медианасы ${comparison.medianCalories} ккал, диапазоны ${comparison.calorieRange.min}-${comparison.calorieRange.max} ккал. Сіздің айырмашылығыңыз: ${formatSigned(comparison.difference)} ккал.`);
+  setText("profileSummary", `Ең жақын профильдер ${sportLabels[values.sport]}, ${goalLabels[values.goal]}, ${activityLabels[values.activityLevel]} белсенділік бойынша сұрыпталды.`);
 
   drawMacroChart(nutrition);
+  renderSimilarProfiles(similarAthletes.slice(0, 5));
 }
 
 function saveCalculation(values) {
@@ -377,7 +542,7 @@ function renderProgress() {
   }
 
   list.innerHTML = items
-    .map((item) => `<div><span>${item.date}</span><strong>${item.weight} кг</strong><small>${item.note || "Ескерту жоқ"}</small></div>`)
+    .map((item) => `<div><span>${escapeHtml(item.date)}</span><strong>${escapeHtml(item.weight)} кг</strong><small>${escapeHtml(item.note || "Ескерту жоқ")}</small></div>`)
     .join("");
 }
 
@@ -435,8 +600,15 @@ if (clearProgressButton) {
 
 const latestResult = getJson(resultKey, null);
 
-if (latestResult) {
-  renderResults(latestResult);
+if (latestResult?.values) {
+  const upgradedResult = {
+    ...latestResult,
+    nutrition: calculateNutrition(latestResult.values),
+    similarAthletes: getSimilarAthletes(latestResult.values),
+  };
+
+  localStorage.setItem(resultKey, JSON.stringify(upgradedResult));
+  renderResults(upgradedResult);
 } else {
   drawMacroChart({ protein: 150, fat: 80, carbs: 390, targetCalories: 2900 });
 }

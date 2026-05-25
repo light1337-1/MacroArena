@@ -222,8 +222,20 @@
         </div>
         <div class="comparison-table" role="table" aria-label="Салыстыру көрсеткіштері">
           <div role="row">
+            <span role="cell">Датасет көлемі</span>
+            <strong role="cell" id="datasetSize">--</strong>
+          </div>
+          <div role="row">
             <span role="cell">Ұқсас спортшылар</span>
             <strong role="cell" id="similarCount">--</strong>
+          </div>
+          <div role="row">
+            <span role="cell">Сәйкестік сапасы</span>
+            <strong role="cell" id="matchQuality">--</strong>
+          </div>
+          <div role="row">
+            <span role="cell">Калория диапазоны</span>
+            <strong role="cell" id="calorieRange">--</strong>
           </div>
           <div role="row">
             <span role="cell">Орташа салмақ</span>
@@ -241,7 +253,20 @@
             <span role="cell">Айырмашылық</span>
             <strong role="cell" id="calorieDifference">--</strong>
           </div>
+          <div role="row">
+            <span role="cell">Процентиль</span>
+            <strong role="cell" id="caloriePercentile">--</strong>
+          </div>
         </div>
+      </section>
+
+      <section class="section compact-section" aria-label="Ең жақын профильдер">
+        <div class="section-heading">
+          <p class="eyebrow">nearest profiles</p>
+          <h2>Ең жақын профильдер</h2>
+          <p id="profileSummary">Есептеуден кейін ең жақын 5 спортшы профилі көрсетіледі.</p>
+        </div>
+        <div class="profile-grid" id="similarProfiles"></div>
       </section>
 
       <section id="progress" class="section">

@@ -17,6 +17,106 @@ ON CONFLICT (id) DO UPDATE SET
 
 SELECT setval('sports_id_seq', (SELECT MAX(id) FROM sports));
 
+WITH sport_profiles (sport_id, duration_base, intensity) AS (
+  VALUES
+    (1, 85, 1.06),
+    (2, 75, 1.12),
+    (3, 60, 1.00),
+    (4, 80, 1.08),
+    (5, 70, 1.03),
+    (6, 90, 1.09),
+    (7, 100, 1.11)
+),
+gender_profiles (gender, height_base, weight_base, gender_adjustment) AS (
+  VALUES
+    ('male', 170, 64, 5),
+    ('female', 160, 52, -161)
+),
+goals (goal, goal_weight_delta, protein_factor, fat_factor) AS (
+  VALUES
+    ('maintenance', 0, 2.05, 0.85),
+    ('gain', 3, 2.05, 1.00),
+    ('loss', -2, 2.25, 0.85)
+),
+activities (activity_level, activity_factor, days_base) AS (
+  VALUES
+    ('low', 1.25, 2),
+    ('medium', 1.45, 3),
+    ('high', 1.65, 5),
+    ('very_high', 1.85, 6)
+),
+age_bands (age_base, age_index) AS (
+  VALUES
+    (16, 0),
+    (19, 1),
+    (22, 2),
+    (26, 3),
+    (31, 4),
+    (37, 5)
+),
+body_templates (template_index, height_delta, weight_delta) AS (
+  VALUES
+    (0, 0, 0),
+    (1, 6, 6),
+    (2, 12, 14),
+    (3, 18, 23)
+),
+body_variants (variant_index, height_delta, weight_delta) AS (
+  VALUES
+    (0, -3, -5),
+    (1, 0, 0),
+    (2, 3, 5),
+    (3, 6, 9)
+),
+profiles AS (
+  SELECT
+    age_bands.age_base + ((sport_profiles.sport_id + body_templates.template_index + body_variants.variant_index) % 3) AS age,
+    gender_profiles.gender,
+    gender_profiles.height_base + body_templates.height_delta + body_variants.height_delta + (sport_profiles.sport_id % 3) - 1 AS height,
+    gender_profiles.weight_base + body_templates.weight_delta + body_variants.weight_delta + age_bands.age_index * 1.4 + goals.goal_weight_delta AS weight,
+    sport_profiles.sport_id,
+    LEAST(7, GREATEST(1, activities.days_base + ((sport_profiles.sport_id + body_variants.variant_index) % 2))) AS training_days_per_week,
+    sport_profiles.duration_base + age_bands.age_index * 3 + body_variants.variant_index * 5 AS training_duration,
+    activities.activity_level,
+    activities.activity_factor,
+    goals.goal,
+    goals.protein_factor,
+    goals.fat_factor,
+    sport_profiles.intensity,
+    body_variants.variant_index,
+    gender_profiles.gender_adjustment
+  FROM sport_profiles
+  CROSS JOIN gender_profiles
+  CROSS JOIN goals
+  CROSS JOIN activities
+  CROSS JOIN age_bands
+  CROSS JOIN body_templates
+  CROSS JOIN body_variants
+),
+calculated AS (
+  SELECT
+    *,
+    10 * weight + 6.25 * height - 5 * age + gender_adjustment AS bmr
+  FROM profiles
+),
+targets AS (
+  SELECT
+    *,
+    CASE goal
+      WHEN 'gain' THEN (bmr * activity_factor + (training_days_per_week * training_duration * 1.7) / 7) * 1.10
+      WHEN 'loss' THEN (bmr * activity_factor + (training_days_per_week * training_duration * 1.7) / 7) * 0.85
+      ELSE bmr * activity_factor + (training_days_per_week * training_duration * 1.7) / 7
+    END AS target_calories
+  FROM calculated
+),
+macros AS (
+  SELECT
+    *,
+    ROUND(target_calories * intensity + (variant_index - 1.5) * 45) AS average_calories,
+    ROUND(weight * protein_factor) AS protein,
+    ROUND(weight * fat_factor) AS fat
+  FROM targets
+)
 INSERT INTO athlete_data (
   age,
   gender,
@@ -31,25 +131,19 @@ INSERT INTO athlete_data (
   protein,
   fat,
   carbs
-) VALUES
-  (18, 'male', 178, 72, 1, 4, 90, 'high', 'maintenance', 2950, 145, 82, 390),
-  (21, 'male', 182, 78, 1, 5, 100, 'high', 'gain', 3350, 165, 95, 455),
-  (19, 'female', 168, 61, 1, 3, 75, 'medium', 'loss', 2150, 118, 58, 285),
-  (20, 'male', 176, 70, 2, 5, 80, 'very_high', 'maintenance', 3100, 154, 86, 415),
-  (23, 'male', 180, 76, 2, 6, 90, 'very_high', 'loss', 2850, 170, 74, 355),
-  (18, 'female', 164, 57, 2, 4, 70, 'high', 'maintenance', 2300, 120, 64, 300),
-  (22, 'male', 175, 68, 3, 4, 60, 'medium', 'loss', 2350, 135, 62, 310),
-  (20, 'female', 166, 58, 3, 3, 55, 'medium', 'maintenance', 2100, 110, 58, 275),
-  (24, 'male', 183, 80, 3, 5, 75, 'high', 'maintenance', 3000, 150, 83, 400),
-  (19, 'male', 181, 74, 4, 4, 80, 'high', 'maintenance', 2850, 148, 78, 375),
-  (21, 'female', 170, 63, 4, 4, 70, 'high', 'loss', 2250, 126, 60, 285),
-  (25, 'male', 185, 84, 4, 5, 90, 'very_high', 'gain', 3500, 180, 98, 465),
-  (18, 'male', 172, 66, 5, 3, 60, 'medium', 'gain', 2800, 145, 78, 355),
-  (22, 'female', 167, 60, 5, 4, 65, 'medium', 'maintenance', 2200, 118, 61, 285),
-  (24, 'male', 179, 82, 5, 5, 75, 'high', 'loss', 2750, 175, 72, 330),
-  (19, 'male', 188, 83, 6, 4, 90, 'high', 'maintenance', 3150, 160, 88, 420),
-  (21, 'female', 174, 66, 6, 4, 85, 'high', 'maintenance', 2450, 128, 68, 320),
-  (23, 'male', 190, 88, 6, 5, 95, 'very_high', 'gain', 3700, 185, 104, 490),
-  (22, 'male', 177, 71, 7, 5, 100, 'high', 'maintenance', 3200, 148, 90, 435),
-  (26, 'female', 169, 62, 7, 4, 85, 'high', 'loss', 2350, 125, 62, 305),
-  (24, 'male', 184, 79, 7, 6, 120, 'very_high', 'gain', 3750, 172, 105, 505);
+)
+SELECT
+  age,
+  gender,
+  ROUND(height::numeric, 1),
+  ROUND(weight::numeric, 1),
+  sport_id,
+  training_days_per_week,
+  training_duration,
+  activity_level,
+  goal,
+  average_calories,
+  protein,
+  fat,
+  ROUND(GREATEST(80, (average_calories - protein * 4 - fat * 9) / 4)) AS carbs
+FROM macros;

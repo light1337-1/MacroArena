@@ -233,7 +233,8 @@ select {
 .metric-grid span,
 .result-grid span,
 .target-list span,
-.macro-list span {
+.macro-list span,
+.profile-grid span {
   color: var(--muted);
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -276,7 +277,8 @@ select {
 .metric-grid strong,
 .result-grid strong,
 .target-list strong,
-.macro-list strong {
+.macro-list strong,
+.profile-grid strong {
   display: block;
   margin-top: 0.4rem;
   color: var(--cyan);
@@ -450,6 +452,39 @@ select {
 
 .progress-layout {
   grid-template-columns: 1fr;
+}
+
+.compact-section {
+  padding-top: 0;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.profile-grid article {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.profile-grid p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.profile-score {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid rgba(109, 255, 141, 0.38);
+  color: var(--green);
+  font-weight: 800;
 }
 
 .progress-shell {
