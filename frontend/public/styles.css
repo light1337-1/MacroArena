@@ -142,7 +142,6 @@ select {
 .hero-copy p,
 .section-copy,
 .section-heading p,
-.about p,
 .progress-shell p,
 .insight-panel p {
   max-width: 44rem;
@@ -234,8 +233,7 @@ select {
 .metric-grid span,
 .result-grid span,
 .target-list span,
-.macro-list span,
-.about-grid span {
+.macro-list span {
   color: var(--muted);
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -256,8 +254,7 @@ select {
 
 .metric-grid,
 .benefits,
-.result-grid,
-.about-grid {
+.result-grid {
   display: grid;
   gap: 1rem;
 }
@@ -270,8 +267,7 @@ select {
 
 .metric-grid div,
 .benefits article,
-.result-grid article,
-.about-grid article {
+.result-grid article {
   padding: 1rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
@@ -280,8 +276,7 @@ select {
 .metric-grid strong,
 .result-grid strong,
 .target-list strong,
-.macro-list strong,
-.about-grid strong {
+.macro-list strong {
   display: block;
   margin-top: 0.4rem;
   color: var(--cyan);
@@ -485,15 +480,6 @@ select {
   font-size: 1.35rem;
 }
 
-.about {
-  padding-bottom: 7rem;
-}
-
-.about-grid {
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: 2rem;
-}
-
 @media (max-width: 980px) {
   .analytics-grid,
   .macro-panel,
@@ -520,8 +506,7 @@ select {
   }
 
   .benefits,
-  .result-grid,
-  .about-grid {
+  .result-grid {
     grid-template-columns: 1fr;
   }
 

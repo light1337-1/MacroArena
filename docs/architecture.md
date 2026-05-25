@@ -24,7 +24,6 @@
   - `ResultsPage.jsx`
   - `ComparisonPage.jsx`
   - `ProgressPage.jsx`
-  - `AboutPage.jsx`
 - `features/calculator` — ввод данных и валидация.
 - `features/results` — карточки калорий и БЖУ.
 - `features/comparison` — блок аналитики по похожим спортсменам.
