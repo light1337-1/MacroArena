@@ -364,6 +364,29 @@ select {
   line-height: 1.5;
 }
 
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.preset-row button {
+  min-height: 2.4rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.55rem 0.75rem;
+  font-weight: 800;
+}
+
+.preset-row button:hover,
+.preset-row button:focus {
+  border-color: var(--green);
+  color: var(--green);
+  outline: none;
+}
+
 .calculator-form input:focus,
 .calculator-form select:focus,
 .nutrition-form textarea:focus,
@@ -472,6 +495,7 @@ select {
 }
 
 .food-list,
+.meal-history,
 .recommendation-list {
   display: grid;
   gap: 0.75rem;
@@ -479,6 +503,7 @@ select {
 }
 
 .food-list article,
+.meal-history article,
 .recommendation-list article {
   padding: 0.9rem;
   border: 1px solid var(--line);
@@ -486,10 +511,51 @@ select {
 }
 
 .food-list strong,
+.meal-history strong,
 .recommendation-list strong {
   display: block;
   margin-top: 0.25rem;
   color: var(--text);
+}
+
+.nutrition-bars {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.nutrition-bars div {
+  position: relative;
+  overflow: hidden;
+  min-height: 3.3rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nutrition-bars span,
+.meal-history span {
+  position: relative;
+  z-index: 1;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.nutrition-bars strong {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.nutrition-bars i {
+  position: absolute;
+  inset: auto auto 0 0;
+  width: 0;
+  height: 0.35rem;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  transition: width 180ms ease;
 }
 
 .comparison-table {

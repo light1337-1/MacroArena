@@ -228,8 +228,13 @@
               Бүгінгі тамақ
               <textarea name="mealText" rows="7" placeholder="Мысалы: 2-3 яйца, 150г курицы, 200г риса, литр воды"></textarea>
             </label>
+            <div class="preset-row" aria-label="Жылдам мысалдар">
+              <button type="button" data-meal="2 яйца, 150г риса, 1 литр воды">2 яйца + рис + вода</button>
+              <button type="button" data-meal="150г курицы, 200г картошки, салат">Курица + картошка</button>
+              <button type="button" data-meal="порция протеина, банан, 500мл воды">Протеин + банан</button>
+            </div>
             <div class="hero-actions">
-              <button class="primary-action" type="submit">Рационды есептеу</button>
+              <button class="primary-action" type="submit">Рационға қосу</button>
               <button class="ghost-button" type="button" id="clearNutrition">Тазалау</button>
             </div>
             <p class="form-note" id="nutritionNote" role="status"></p>
@@ -246,7 +251,15 @@
               <div><span>Май</span><strong id="eatenFat">--</strong></div>
               <div><span>Көмірсу</span><strong id="eatenCarbs">--</strong></div>
             </div>
+            <div class="nutrition-bars" aria-label="Күндік прогресс">
+              <div><span>Калория</span><strong id="calorieProgressText">--</strong><i id="calorieProgress"></i></div>
+              <div><span>Ақуыз</span><strong id="proteinProgressText">--</strong><i id="proteinProgress"></i></div>
+              <div><span>Май</span><strong id="fatProgressText">--</strong><i id="fatProgress"></i></div>
+              <div><span>Көмірсу</span><strong id="carbsProgressText">--</strong><i id="carbsProgress"></i></div>
+              <div><span>Су</span><strong id="waterProgressText">--</strong><i id="waterProgress"></i></div>
+            </div>
             <div class="food-list" id="foodList"></div>
+            <div class="meal-history" id="mealHistory"></div>
             <div class="recommendation-list" id="foodRecommendations"></div>
           </section>
         </div>

@@ -9,6 +9,7 @@ const draftKey = "macroarena.calculatorDraft";
 const resultKey = "macroarena.latestResult";
 const progressKey = "macroarena.progress";
 const foodKey = "macroarena.foodText";
+const foodHistoryKey = "macroarena.foodHistory";
 
 const activityFactors = {
   low: 1.25,
@@ -361,6 +362,17 @@ function findFood(segment) {
 
 function getAmount(segment, food) {
   const normalized = segment.toLowerCase().replace(",", ".");
+
+  if (/(пол\s*литра|поллитра|жарты\s*литр)/.test(normalized)) return 500;
+  if (/(стакан|стакана|стаканов)/.test(normalized)) {
+    const glassMatch = normalized.match(/(\d+(?:\.\d+)?)/);
+    return (glassMatch ? Number(glassMatch[1]) : 1) * 250;
+  }
+  if (/(бутылка|бутылки|бутылок)/.test(normalized)) {
+    const bottleMatch = normalized.match(/(\d+(?:\.\d+)?)/);
+    return (bottleMatch ? Number(bottleMatch[1]) : 1) * 500;
+  }
+
   const rangeMatch = normalized.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/);
   const numberMatch = normalized.match(/(\d+(?:\.\d+)?)/);
   let amount = rangeMatch
@@ -410,10 +422,55 @@ function parseMealText(text) {
     .map(calculateFoodItem);
 }
 
+function getFoodHistory() {
+  return getJson(foodHistoryKey, []);
+}
+
+function saveFoodHistory(items) {
+  localStorage.setItem(foodHistoryKey, JSON.stringify(items));
+}
+
+function getItemTotals(items) {
+  return {
+    calories: sumFood(items, "calories"),
+    protein: sumFood(items, "protein"),
+    fat: sumFood(items, "fat"),
+    carbs: sumFood(items, "carbs"),
+    water: sumFood(items, "water"),
+  };
+}
+
 function sumFood(items, key) {
   return items
     .filter((item) => item.recognized)
     .reduce((sum, item) => sum + item[key], 0);
+}
+
+function getNutritionTargets(latest) {
+  const nutrition = latest?.nutrition;
+  const weight = latest?.values?.weight ?? 70;
+
+  return {
+    calories: nutrition?.targetCalories ?? 0,
+    protein: nutrition?.protein ?? 0,
+    fat: nutrition?.fat ?? 0,
+    carbs: nutrition?.carbs ?? 0,
+    water: round(weight * 35),
+  };
+}
+
+function setProgressBar(barId, textId, current, target, unit) {
+  const bar = document.querySelector(`#${barId}`);
+  const percent = target ? Math.min(130, Math.round((current / target) * 100)) : 0;
+
+  setText(textId, target ? `${current}/${target} ${unit}` : `${current} ${unit}`);
+
+  if (bar) {
+    bar.style.width = `${percent}%`;
+    bar.style.background = percent > 110
+      ? "linear-gradient(90deg, var(--warning), var(--danger))"
+      : "linear-gradient(90deg, var(--green), var(--cyan))";
+  }
 }
 
 function getFoodRecommendations(totals, latest) {
@@ -421,14 +478,15 @@ function getFoodRecommendations(totals, latest) {
     return ["Алдымен калькуляторда күндік норманы есептеңіз, сонда сайт қанша қалғанын нақты көрсетеді."];
   }
 
-  const nutrition = latest.nutrition;
-  const remainingCalories = nutrition.targetCalories - totals.calories;
-  const remainingProtein = nutrition.protein - totals.protein;
-  const remainingCarbs = nutrition.carbs - totals.carbs;
+  const targets = getNutritionTargets(latest);
+  const remainingCalories = targets.calories - totals.calories;
+  const remainingProtein = targets.protein - totals.protein;
+  const remainingCarbs = targets.carbs - totals.carbs;
+  const remainingWater = targets.water - totals.water;
   const recommendations = [];
 
   if (remainingCalories > 700) {
-    recommendations.push("Калория әлі көп қалды: күріш, қарақұмық, картоп немесе макарон қосуға болады.");
+    recommendations.push(`Калория әлі көп қалды: шамамен ${Math.min(250, Math.max(120, round(remainingCarbs * 1.1)))}г күріш/картоп және ақуыз көзі қосуға болады.`);
   } else if (remainingCalories < -150) {
     recommendations.push("Калория нормадан асып кетті: келесі тамақта жеңіл ақуыз және көкөніс таңдаңыз.");
   } else {
@@ -436,46 +494,49 @@ function getFoodRecommendations(totals, latest) {
   }
 
   if (remainingProtein > 25) {
-    recommendations.push("Ақуыз жетіспейді: тауық еті, балық, сүзбе, жұмыртқа немесе протеин ыңғайлы.");
+    recommendations.push(`Ақуыз жетіспейді: шамамен ${round((remainingProtein / 31) * 100)}г тауық еті немесе ${Math.ceil(remainingProtein / 24)} порция протеин көмектеседі.`);
   }
 
   if (remainingCarbs > 60 && remainingCalories > 200) {
     recommendations.push("Көмірсу аз: банан, күріш, сұлы немесе картоп жаттығудан кейін жақсы келеді.");
   }
 
-  if (totals.water < 1500) {
-    recommendations.push("Су аз: бүгін кемінде тағы 0.5-1 литр су ішуге тырысыңыз.");
+  if (remainingWater > 400) {
+    recommendations.push(`Су аз: бүгін тағы шамамен ${Math.ceil(remainingWater / 250) * 250} мл су ішкен дұрыс.`);
   }
 
   return recommendations;
 }
 
 function renderNutrition(text) {
-  const items = parseMealText(text);
+  const previewItems = parseMealText(text);
+  const history = getFoodHistory();
+  const historyItems = history.flatMap((meal) => meal.items);
+  const items = [...historyItems, ...previewItems];
   const latest = getJson(resultKey, null);
-  const totals = {
-    calories: sumFood(items, "calories"),
-    protein: sumFood(items, "protein"),
-    fat: sumFood(items, "fat"),
-    carbs: sumFood(items, "carbs"),
-    water: sumFood(items, "water"),
-  };
-  const targetCalories = latest?.nutrition?.targetCalories ?? 0;
-  const remainingCalories = targetCalories ? targetCalories - totals.calories : 0;
+  const totals = getItemTotals(items);
+  const targets = getNutritionTargets(latest);
+  const remainingCalories = targets.calories ? targets.calories - totals.calories : 0;
   const recognized = items.filter((item) => item.recognized);
-  const unknown = items.filter((item) => !item.recognized);
+  const unknown = previewItems.filter((item) => !item.recognized);
   const foodList = document.querySelector("#foodList");
+  const mealHistory = document.querySelector("#mealHistory");
   const foodRecommendations = document.querySelector("#foodRecommendations");
 
   setText("eatenCalories", `${totals.calories} ккал`);
-  setText("remainingCalories", targetCalories ? `${formatSigned(remainingCalories)} ккал` : "--");
+  setText("remainingCalories", targets.calories ? `${formatSigned(remainingCalories)} ккал` : "--");
   setText("waterValue", `${totals.water} мл`);
   setText("eatenProtein", `${totals.protein} г`);
   setText("eatenFat", `${totals.fat} г`);
   setText("eatenCarbs", `${totals.carbs} г`);
-  setText("foodSummary", targetCalories
-    ? `Күндік мақсат ${targetCalories} ккал. Қазір желінгені ${totals.calories} ккал, қалғаны ${formatSigned(remainingCalories)} ккал.`
+  setText("foodSummary", targets.calories
+    ? `Күндік мақсат ${targets.calories} ккал. Бүгінгі рацион ${totals.calories} ккал, қалғаны ${formatSigned(remainingCalories)} ккал.`
     : "Рацион есептелді. Күндік қалдықты көру үшін алдымен калькуляторды толтырыңыз.");
+  setProgressBar("calorieProgress", "calorieProgressText", totals.calories, targets.calories, "ккал");
+  setProgressBar("proteinProgress", "proteinProgressText", totals.protein, targets.protein, "г");
+  setProgressBar("fatProgress", "fatProgressText", totals.fat, targets.fat, "г");
+  setProgressBar("carbsProgress", "carbsProgressText", totals.carbs, targets.carbs, "г");
+  setProgressBar("waterProgress", "waterProgressText", totals.water, targets.water, "мл");
 
   if (foodList) {
     foodList.innerHTML = recognized.length
@@ -487,6 +548,18 @@ function renderNutrition(text) {
           </article>
         `).join("")
       : "<article><strong>Танылған өнім жоқ</strong><p>Мысалы: 2 яйца, 150г курицы, 1 литр воды.</p></article>";
+  }
+
+  if (mealHistory) {
+    mealHistory.innerHTML = history.length
+      ? history.map((meal) => `
+          <article>
+            <span>${escapeHtml(meal.time)}</span>
+            <strong>${escapeHtml(meal.text)}</strong>
+            <p>${meal.totals.calories} ккал · ${meal.totals.protein}г/${meal.totals.fat}г/${meal.totals.carbs}г · ${meal.totals.water} мл су</p>
+          </article>
+        `).join("")
+      : "<article><span>Күндік тарих</span><strong>Әзірге қабылдау қосылған жоқ</strong></article>";
   }
 
   if (foodRecommendations) {
@@ -753,14 +826,44 @@ if (nutritionForm) {
     renderNutrition(savedFoodText);
   }
 
+  textArea?.addEventListener("input", () => {
+    localStorage.setItem(foodKey, textArea.value);
+    renderNutrition(textArea.value);
+  });
+
+  document.querySelectorAll("[data-meal]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const current = textArea.value.trim();
+      textArea.value = current ? `${current}, ${button.dataset.meal}` : button.dataset.meal;
+      localStorage.setItem(foodKey, textArea.value);
+      renderNutrition(textArea.value);
+    });
+  });
+
   nutritionForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const text = nutritionForm.elements.mealText.value.trim();
-    const result = renderNutrition(text);
+    const parsedItems = parseMealText(text);
+    const recognized = parsedItems.filter((item) => item.recognized);
+    const unknown = parsedItems.filter((item) => !item.recognized);
 
-    localStorage.setItem(foodKey, text);
-    setText("nutritionNote", result.unknown.length
-      ? `Есеп дайын. Танылмаған өнімдер: ${result.unknown.map((item) => item.raw).join(", ")}.`
+    if (recognized.length) {
+      const history = getFoodHistory();
+      history.push({
+        id: Date.now(),
+        time: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }),
+        text,
+        items: recognized,
+        totals: getItemTotals(recognized),
+      });
+      saveFoodHistory(history.slice(-12));
+      nutritionForm.reset();
+      localStorage.removeItem(foodKey);
+    }
+
+    renderNutrition("");
+    setText("nutritionNote", unknown.length
+      ? `Қосылды. Танылмаған өнімдер: ${unknown.map((item) => item.raw).join(", ")}.`
       : "Рацион есептелді, қалдық және ұсыныстар жаңартылды.");
   });
 }
@@ -768,6 +871,7 @@ if (nutritionForm) {
 if (clearNutritionButton) {
   clearNutritionButton.addEventListener("click", () => {
     localStorage.removeItem(foodKey);
+    localStorage.removeItem(foodHistoryKey);
     if (nutritionForm?.elements.mealText) {
       nutritionForm.elements.mealText.value = "";
     }
