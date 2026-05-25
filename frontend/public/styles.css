@@ -207,6 +207,8 @@ select {
 .comparison-table,
 .macro-panel,
 .insight-panel,
+.nutrition-form,
+.food-results,
 .progress-form,
 .progress-shell {
   border: 1px solid var(--line);
@@ -318,6 +320,7 @@ select {
 }
 
 .calculator-form,
+.nutrition-form,
 .progress-form {
   display: grid;
   gap: 1rem;
@@ -334,6 +337,7 @@ select {
 }
 
 .calculator-form label,
+.nutrition-form label,
 .progress-form label {
   display: grid;
   gap: 0.45rem;
@@ -343,6 +347,7 @@ select {
 
 .calculator-form input,
 .calculator-form select,
+.nutrition-form textarea,
 .progress-form input {
   width: 100%;
   min-height: 3rem;
@@ -352,8 +357,16 @@ select {
   padding: 0 0.85rem;
 }
 
+.nutrition-form textarea {
+  min-height: 11rem;
+  padding: 0.85rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
 .calculator-form input:focus,
 .calculator-form select:focus,
+.nutrition-form textarea:focus,
 .progress-form input:focus {
   border-color: var(--green);
   outline: none;
@@ -380,6 +393,7 @@ select {
 }
 
 .analytics-grid,
+.meal-layout,
 .progress-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
@@ -388,7 +402,8 @@ select {
 }
 
 .macro-panel,
-.insight-panel {
+.insight-panel,
+.food-results {
   padding: clamp(1rem, 3vw, 2rem);
 }
 
@@ -413,17 +428,68 @@ select {
 }
 
 .macro-list,
-.target-list {
+.target-list,
+.remaining-grid {
   display: grid;
   gap: 0.75rem;
   margin-top: 1.25rem;
 }
 
 .macro-list div,
-.target-list div {
+.target-list div,
+.remaining-grid article {
   padding: 0.9rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
+}
+
+.meal-layout {
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+}
+
+.remaining-grid {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 0;
+}
+
+.remaining-grid span,
+.food-list span,
+.recommendation-list span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.remaining-grid strong {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--green);
+  font-size: 1.45rem;
+}
+
+.food-macros {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.food-list,
+.recommendation-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.food-list article,
+.recommendation-list article {
+  padding: 0.9rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.food-list strong,
+.recommendation-list strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text);
 }
 
 .comparison-table {
@@ -517,6 +583,7 @@ select {
 
 @media (max-width: 980px) {
   .analytics-grid,
+  .meal-layout,
   .macro-panel,
   .progress-form {
     grid-template-columns: 1fr;
@@ -560,6 +627,11 @@ select {
   }
 
   .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .remaining-grid,
+  .food-macros {
     grid-template-columns: 1fr;
   }
 

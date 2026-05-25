@@ -16,6 +16,7 @@
         <a href="#home">Басты</a>
         <a href="#calculator">Калькулятор</a>
         <a href="#results">Нәтиже</a>
+        <a href="#nutrition">Рацион</a>
         <a href="#comparison">Салыстыру</a>
         <a href="#progress">Прогресс</a>
       </nav>
@@ -208,6 +209,45 @@
               <div><span>Күндік мақсат</span><strong id="targetCalories">--</strong></div>
               <div><span>Белсенділік коэффициенті</span><strong id="activityFactor">--</strong></div>
             </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="nutrition" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">food tracker</p>
+          <h2>Рацион есебі</h2>
+          <p id="foodSummary">
+            Не жегеніңізді қарапайым мәтінмен жазыңыз: мысалы, 2 жұмыртқа, 150г күріш, 1 литр су.
+          </p>
+        </div>
+
+        <div class="meal-layout">
+          <form class="nutrition-form" id="nutritionForm">
+            <label>
+              Бүгінгі тамақ
+              <textarea name="mealText" rows="7" placeholder="Мысалы: 2-3 яйца, 150г курицы, 200г риса, литр воды"></textarea>
+            </label>
+            <div class="hero-actions">
+              <button class="primary-action" type="submit">Рационды есептеу</button>
+              <button class="ghost-button" type="button" id="clearNutrition">Тазалау</button>
+            </div>
+            <p class="form-note" id="nutritionNote" role="status"></p>
+          </form>
+
+          <section class="food-results" aria-label="Рацион нәтижесі">
+            <div class="remaining-grid">
+              <article><span>Желінді</span><strong id="eatenCalories">--</strong></article>
+              <article><span>Қалды</span><strong id="remainingCalories">--</strong></article>
+              <article><span>Су</span><strong id="waterValue">--</strong></article>
+            </div>
+            <div class="macro-list food-macros">
+              <div><span>Ақуыз</span><strong id="eatenProtein">--</strong></div>
+              <div><span>Май</span><strong id="eatenFat">--</strong></div>
+              <div><span>Көмірсу</span><strong id="eatenCarbs">--</strong></div>
+            </div>
+            <div class="food-list" id="foodList"></div>
+            <div class="recommendation-list" id="foodRecommendations"></div>
           </section>
         </div>
       </section>

@@ -14,4 +14,4 @@
 - `progress.user_id -> users.id`
 
 Seed-данные:
-- `database/seeds/001_seed_sports_and_athletes.sql` — виды спорта и большой синтетический набор похожих спортсменов для аналитики.
+- `database/seeds/001_seed_sports_and_athletes.sql` — виды спорта и синтетический набор из `250` похожих спортсменов для аналитики.

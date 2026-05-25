@@ -1,2 +1,2 @@
 // Route map (architecture stub)
-// /, /calculator, /results, /comparison, /progress
+// /, /calculator, /results, /nutrition, /comparison, /progress

@@ -146,4 +146,6 @@ SELECT
   protein,
   fat,
   ROUND(GREATEST(80, (average_calories - protein * 4 - fat * 9) / 4)) AS carbs
-FROM macros;
+FROM macros
+ORDER BY sport_id, gender, goal, activity_level, age, height, weight
+LIMIT 250;

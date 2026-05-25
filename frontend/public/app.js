@@ -1,11 +1,14 @@
 const form = document.querySelector("#calculatorForm");
 const progressForm = document.querySelector("#progressForm");
+const nutritionForm = document.querySelector("#nutritionForm");
 const formNote = document.querySelector("#formNote");
 const clearProgressButton = document.querySelector("#clearProgress");
+const clearNutritionButton = document.querySelector("#clearNutrition");
 
 const draftKey = "macroarena.calculatorDraft";
 const resultKey = "macroarena.latestResult";
 const progressKey = "macroarena.progress";
+const foodKey = "macroarena.foodText";
 
 const activityFactors = {
   low: 1.25,
@@ -221,7 +224,7 @@ function generateAthleteDataset() {
     });
   });
 
-  return profiles;
+  return profiles.slice(0, 250);
 }
 
 const athleteData = generateAthleteDataset();
@@ -324,6 +327,176 @@ function buildInsight(values, nutrition, difference) {
   return Math.abs(difference) <= 180
     ? "Нәтиже ұқсас спортшылардың орташа көрсеткішіне жақын. Қазіргі жоспарды жалғастыруға болады."
     : "Нормаңыз орташа мәннен өзгеше. Бұл дене параметрлері мен жаттығу жүктемесіне байланысты болуы мүмкін.";
+}
+
+const foodDatabase = [
+  { name: "Жұмыртқа", aliases: ["яйцо", "яйца", "жұмыртқа", "жумыртка"], unit: "piece", calories: 70, protein: 6, fat: 5, carbs: 0.5, water: 0 },
+  { name: "Су", aliases: ["вода", "воды", "су"], unit: "ml", calories: 0, protein: 0, fat: 0, carbs: 0, water: 1 },
+  { name: "Тауық еті", aliases: ["курица", "курицы", "тауық", "тауык", "chicken"], unit: "100g", calories: 165, protein: 31, fat: 3.6, carbs: 0, water: 0 },
+  { name: "Күріш", aliases: ["рис", "риса", "күріш", "куриш"], unit: "100g", calories: 130, protein: 2.7, fat: 0.3, carbs: 28, water: 0 },
+  { name: "Қарақұмық", aliases: ["гречка", "гречки", "қарақұмық", "каракумык"], unit: "100g", calories: 110, protein: 3.6, fat: 1.2, carbs: 20, water: 0 },
+  { name: "Сұлы ботқасы", aliases: ["овсянка", "овсянки", "сұлы", "сулы"], unit: "100g", calories: 68, protein: 2.4, fat: 1.4, carbs: 12, water: 0 },
+  { name: "Банан", aliases: ["банан", "banana"], unit: "piece", calories: 105, protein: 1.3, fat: 0.4, carbs: 27, water: 0 },
+  { name: "Алма", aliases: ["яблоко", "яблока", "алма"], unit: "piece", calories: 95, protein: 0.5, fat: 0.3, carbs: 25, water: 0 },
+  { name: "Нан", aliases: ["хлеб", "нан"], unit: "100g", calories: 250, protein: 8, fat: 3, carbs: 49, water: 0 },
+  { name: "Сүт", aliases: ["молоко", "молока", "сүт", "сут"], unit: "ml", calories: 0.62, protein: 0.032, fat: 0.033, carbs: 0.048, water: 0.9 },
+  { name: "Айран", aliases: ["кефир", "айран"], unit: "ml", calories: 0.5, protein: 0.03, fat: 0.025, carbs: 0.04, water: 0.9 },
+  { name: "Сүзбе", aliases: ["творог", "творога", "сүзбе", "сузбе"], unit: "100g", calories: 121, protein: 17, fat: 5, carbs: 3, water: 0 },
+  { name: "Сиыр еті", aliases: ["говядина", "говядины", "сиыр еті", "говядина"], unit: "100g", calories: 217, protein: 26, fat: 12, carbs: 0, water: 0 },
+  { name: "Балық", aliases: ["рыба", "рыбы", "балық", "балык", "fish"], unit: "100g", calories: 140, protein: 22, fat: 5, carbs: 0, water: 0 },
+  { name: "Картоп", aliases: ["картошка", "картофель", "картоп"], unit: "100g", calories: 87, protein: 1.9, fat: 0.1, carbs: 20, water: 0 },
+  { name: "Макарон", aliases: ["макароны", "паста", "макарон"], unit: "100g", calories: 158, protein: 5.8, fat: 0.9, carbs: 31, water: 0 },
+  { name: "Ірімшік", aliases: ["сыр", "сыра", "ірімшік", "иримшик"], unit: "100g", calories: 350, protein: 25, fat: 27, carbs: 2, water: 0 },
+  { name: "Жаңғақ", aliases: ["орех", "орехи", "жаңғақ", "жангак"], unit: "100g", calories: 607, protein: 20, fat: 54, carbs: 21, water: 0 },
+  { name: "Протеин", aliases: ["протеин", "protein"], unit: "portion", calories: 120, protein: 24, fat: 2, carbs: 3, water: 0 },
+  { name: "Салат", aliases: ["салат", "овощи", "көкөніс", "коконис"], unit: "100g", calories: 35, protein: 1.5, fat: 0.3, carbs: 7, water: 0 },
+  { name: "Қияр", aliases: ["огурец", "огурцы", "қияр", "кияр"], unit: "100g", calories: 15, protein: 0.7, fat: 0.1, carbs: 3.6, water: 0 },
+  { name: "Қызанақ", aliases: ["помидор", "помидоры", "қызанақ", "кызанак"], unit: "100g", calories: 18, protein: 0.9, fat: 0.2, carbs: 3.9, water: 0 },
+];
+
+function findFood(segment) {
+  const normalized = segment.toLowerCase();
+  return foodDatabase.find((food) => food.aliases.some((alias) => normalized.includes(alias)));
+}
+
+function getAmount(segment, food) {
+  const normalized = segment.toLowerCase().replace(",", ".");
+  const rangeMatch = normalized.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/);
+  const numberMatch = normalized.match(/(\d+(?:\.\d+)?)/);
+  let amount = rangeMatch
+    ? (Number(rangeMatch[1]) + Number(rangeMatch[2])) / 2
+    : numberMatch
+      ? Number(numberMatch[1])
+      : 1;
+
+  if (/(кг|килограмм)/.test(normalized)) return amount * 1000;
+  if (/(л|литр)/.test(normalized)) return amount * 1000;
+  if (/(мл|миллилитр)/.test(normalized)) return amount;
+  if (/(г|гр|грамм)/.test(normalized)) return amount;
+  if (food.unit === "100g") return amount > 10 ? amount : amount * 100;
+  if (food.unit === "ml") return amount > 10 ? amount : amount * 1000;
+  return amount;
+}
+
+function calculateFoodItem(segment) {
+  const food = findFood(segment);
+
+  if (!food) {
+    return { raw: segment.trim(), recognized: false };
+  }
+
+  const amount = getAmount(segment, food);
+  const multiplier = food.unit === "100g" ? amount / 100 : amount;
+
+  return {
+    raw: segment.trim(),
+    recognized: true,
+    name: food.name,
+    amount,
+    calories: round(food.calories * multiplier),
+    protein: round(food.protein * multiplier),
+    fat: round(food.fat * multiplier),
+    carbs: round(food.carbs * multiplier),
+    water: food.unit === "ml" ? round(food.water * amount) : round(food.water * multiplier),
+    unit: food.unit,
+  };
+}
+
+function parseMealText(text) {
+  return text
+    .split(/[\n,;]+|\s+и\s+|\s+және\s+/i)
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .map(calculateFoodItem);
+}
+
+function sumFood(items, key) {
+  return items
+    .filter((item) => item.recognized)
+    .reduce((sum, item) => sum + item[key], 0);
+}
+
+function getFoodRecommendations(totals, latest) {
+  if (!latest?.nutrition) {
+    return ["Алдымен калькуляторда күндік норманы есептеңіз, сонда сайт қанша қалғанын нақты көрсетеді."];
+  }
+
+  const nutrition = latest.nutrition;
+  const remainingCalories = nutrition.targetCalories - totals.calories;
+  const remainingProtein = nutrition.protein - totals.protein;
+  const remainingCarbs = nutrition.carbs - totals.carbs;
+  const recommendations = [];
+
+  if (remainingCalories > 700) {
+    recommendations.push("Калория әлі көп қалды: күріш, қарақұмық, картоп немесе макарон қосуға болады.");
+  } else if (remainingCalories < -150) {
+    recommendations.push("Калория нормадан асып кетті: келесі тамақта жеңіл ақуыз және көкөніс таңдаңыз.");
+  } else {
+    recommendations.push("Калория күндік мақсатқа жақын. Қалған бөлікті жеңіл тамақпен жабуға болады.");
+  }
+
+  if (remainingProtein > 25) {
+    recommendations.push("Ақуыз жетіспейді: тауық еті, балық, сүзбе, жұмыртқа немесе протеин ыңғайлы.");
+  }
+
+  if (remainingCarbs > 60 && remainingCalories > 200) {
+    recommendations.push("Көмірсу аз: банан, күріш, сұлы немесе картоп жаттығудан кейін жақсы келеді.");
+  }
+
+  if (totals.water < 1500) {
+    recommendations.push("Су аз: бүгін кемінде тағы 0.5-1 литр су ішуге тырысыңыз.");
+  }
+
+  return recommendations;
+}
+
+function renderNutrition(text) {
+  const items = parseMealText(text);
+  const latest = getJson(resultKey, null);
+  const totals = {
+    calories: sumFood(items, "calories"),
+    protein: sumFood(items, "protein"),
+    fat: sumFood(items, "fat"),
+    carbs: sumFood(items, "carbs"),
+    water: sumFood(items, "water"),
+  };
+  const targetCalories = latest?.nutrition?.targetCalories ?? 0;
+  const remainingCalories = targetCalories ? targetCalories - totals.calories : 0;
+  const recognized = items.filter((item) => item.recognized);
+  const unknown = items.filter((item) => !item.recognized);
+  const foodList = document.querySelector("#foodList");
+  const foodRecommendations = document.querySelector("#foodRecommendations");
+
+  setText("eatenCalories", `${totals.calories} ккал`);
+  setText("remainingCalories", targetCalories ? `${formatSigned(remainingCalories)} ккал` : "--");
+  setText("waterValue", `${totals.water} мл`);
+  setText("eatenProtein", `${totals.protein} г`);
+  setText("eatenFat", `${totals.fat} г`);
+  setText("eatenCarbs", `${totals.carbs} г`);
+  setText("foodSummary", targetCalories
+    ? `Күндік мақсат ${targetCalories} ккал. Қазір желінгені ${totals.calories} ккал, қалғаны ${formatSigned(remainingCalories)} ккал.`
+    : "Рацион есептелді. Күндік қалдықты көру үшін алдымен калькуляторды толтырыңыз.");
+
+  if (foodList) {
+    foodList.innerHTML = recognized.length
+      ? recognized.map((item) => `
+          <article>
+            <span>${escapeHtml(item.raw)}</span>
+            <strong>${item.name}: ${item.calories} ккал</strong>
+            <p>${item.protein}г ақуыз · ${item.fat}г май · ${item.carbs}г көмірсу${item.water ? ` · ${item.water} мл су` : ""}</p>
+          </article>
+        `).join("")
+      : "<article><strong>Танылған өнім жоқ</strong><p>Мысалы: 2 яйца, 150г курицы, 1 литр воды.</p></article>";
+  }
+
+  if (foodRecommendations) {
+    const recommendations = getFoodRecommendations(totals, latest);
+    foodRecommendations.innerHTML = recommendations
+      .map((recommendation) => `<article><span>Ұсыныс</span><strong>${escapeHtml(recommendation)}</strong></article>`)
+      .join("");
+  }
+
+  return { recognized, unknown };
 }
 
 function drawMacroChart(nutrition) {
@@ -438,6 +611,7 @@ function saveCalculation(values) {
   localStorage.setItem(draftKey, JSON.stringify(values));
   localStorage.setItem(resultKey, JSON.stringify(payload));
   renderResults(payload);
+  renderNutrition(localStorage.getItem(foodKey) || "");
 }
 
 function getProgress() {
@@ -570,6 +744,38 @@ if (form) {
   });
 }
 
+if (nutritionForm) {
+  const savedFoodText = localStorage.getItem(foodKey);
+  const textArea = nutritionForm.elements.mealText;
+
+  if (savedFoodText && textArea) {
+    textArea.value = savedFoodText;
+    renderNutrition(savedFoodText);
+  }
+
+  nutritionForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = nutritionForm.elements.mealText.value.trim();
+    const result = renderNutrition(text);
+
+    localStorage.setItem(foodKey, text);
+    setText("nutritionNote", result.unknown.length
+      ? `Есеп дайын. Танылмаған өнімдер: ${result.unknown.map((item) => item.raw).join(", ")}.`
+      : "Рацион есептелді, қалдық және ұсыныстар жаңартылды.");
+  });
+}
+
+if (clearNutritionButton) {
+  clearNutritionButton.addEventListener("click", () => {
+    localStorage.removeItem(foodKey);
+    if (nutritionForm?.elements.mealText) {
+      nutritionForm.elements.mealText.value = "";
+    }
+    renderNutrition("");
+    setText("nutritionNote", "Рацион тазаланды.");
+  });
+}
+
 if (progressForm) {
   setDefaultDate();
 
@@ -613,4 +819,5 @@ if (latestResult?.values) {
   drawMacroChart({ protein: 150, fat: 80, carbs: 390, targetCalories: 2900 });
 }
 
+renderNutrition(localStorage.getItem(foodKey) || "");
 renderProgress();
