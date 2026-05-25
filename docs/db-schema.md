@@ -12,3 +12,6 @@
 - `athlete_data.sport_id -> sports.id`
 - `calculation_results.user_id -> users.id`
 - `progress.user_id -> users.id`
+
+Seed-данные:
+- `database/seeds/001_seed_sports_and_athletes.sql` — виды спорта и стартовый набор похожих спортсменов.

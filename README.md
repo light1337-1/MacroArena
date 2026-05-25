@@ -1,12 +1,25 @@
 # MacroArena
 
-Каркас проекта (только архитектура) по ТЗ.
+Веб-проект для расчета питания спортсменов: калории, БЖУ, сравнение с похожими спортсменами и контроль прогресса.
 
-## Стек (архитектурный выбор)
-- Frontend: React + JavaScript
-- Backend: Node.js + Express
-- Database: PostgreSQL
-- Визуализация: Chart.js / Recharts (на этапе реализации)
+## Статус по календарному плану
+- `22.05` — архитектура проекта готова.
+- `23.05` — дизайн-план и структура экранов готовы.
+- `24.05` — базовый frontend готов как открываемый статический сайт.
+- `25.05` — схема БД и тестовые данные готовы.
 
-## Структура
-См. детально в `docs/architecture.md`.
+## Как открыть frontend
+Откройте файл `frontend/public/index.html` в браузере.
+
+## Стек
+- Frontend: HTML, CSS, JavaScript.
+- Backend: Node.js + Express (архитектурный каркас для этапа `26.05`).
+- Database: PostgreSQL.
+- Visualization: Chart.js / Recharts (для этапа графиков).
+
+## Документация
+- `docs/architecture.md` — общая архитектура.
+- `docs/design-plan.md` — визуальный стиль и макеты.
+- `docs/pages-map.md` — карта страниц.
+- `docs/api-contract.md` — черновик API.
+- `docs/db-schema.md` — описание базы данных.

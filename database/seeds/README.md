@@ -4,4 +4,12 @@
 - `sports`
 - `athlete_data`
 
-Файлы seed не заполняются, так как в задаче требуется только архитектура.
+Готовый seed-файл:
+- `001_seed_sports_and_athletes.sql`
+
+Пример запуска:
+
+```bash
+psql "$DATABASE_URL" -f database/schema.sql
+psql "$DATABASE_URL" -f database/seeds/001_seed_sports_and_athletes.sql
+```

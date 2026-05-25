@@ -56,3 +56,8 @@ CREATE TABLE IF NOT EXISTS progress (
   date DATE NOT NULL,
   note TEXT
 );
+
+CREATE INDEX IF NOT EXISTS idx_users_sport_id ON users(sport_id);
+CREATE INDEX IF NOT EXISTS idx_athlete_data_sport_goal ON athlete_data(sport_id, goal);
+CREATE INDEX IF NOT EXISTS idx_calculation_results_user_created ON calculation_results(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_progress_user_date ON progress(user_id, date);
