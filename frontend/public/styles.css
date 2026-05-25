@@ -8,6 +8,7 @@
   --green: #6dff8d;
   --cyan: #55d6ff;
   --warning: #ffd166;
+  --danger: #ff7a7a;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
 }
 
@@ -24,7 +25,7 @@ body {
   margin: 0;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(109, 255, 141, 0.16), transparent 34rem),
+    radial-gradient(circle at top left, rgba(109, 255, 141, 0.14), transparent 34rem),
     linear-gradient(145deg, #07110f 0%, #0c1815 52%, #09110f 100%);
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
 }
@@ -38,6 +39,12 @@ a {
   text-decoration: none;
 }
 
+button,
+input,
+select {
+  font: inherit;
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -48,7 +55,7 @@ a {
   gap: 1rem;
   padding: 1rem clamp(1rem, 4vw, 4rem);
   border-bottom: 1px solid var(--line);
-  background: rgba(7, 17, 15, 0.86);
+  background: rgba(7, 17, 15, 0.88);
   backdrop-filter: blur(16px);
 }
 
@@ -107,7 +114,10 @@ a {
 .hero-panel,
 .split-section > *,
 .calculator-form,
-.comparison-table {
+.comparison-table,
+.macro-panel,
+.insight-panel,
+.progress-shell {
   min-width: 0;
 }
 
@@ -131,9 +141,11 @@ a {
 
 .hero-copy p,
 .section-copy,
+.section-heading p,
 .about p,
-.progress-shell p {
-  max-width: 42rem;
+.progress-shell p,
+.insight-panel p {
+  max-width: 44rem;
   color: var(--muted);
   font-size: 1.05rem;
   line-height: 1.7;
@@ -148,29 +160,55 @@ a {
   text-transform: uppercase;
 }
 
-.primary-action {
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+}
+
+.primary-action,
+.ghost-action,
+.ghost-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 3rem;
-  margin-top: 1.25rem;
   padding: 0.85rem 1.2rem;
   border: 0;
-  background: var(--green);
-  color: #07110f;
   cursor: pointer;
   font-weight: 800;
 }
 
+.primary-action {
+  background: var(--green);
+  color: #07110f;
+}
+
+.ghost-action,
+.ghost-button {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
 .primary-action:hover,
-.primary-action:focus {
+.primary-action:focus,
+.ghost-action:hover,
+.ghost-action:focus,
+.ghost-button:hover,
+.ghost-button:focus {
   background: var(--cyan);
+  color: #07110f;
   outline: none;
 }
 
 .hero-panel,
 .calculator-form,
 .comparison-table,
+.macro-panel,
+.insight-panel,
+.progress-form,
 .progress-shell {
   border: 1px solid var(--line);
   background: rgba(16, 28, 24, 0.78);
@@ -194,7 +232,10 @@ a {
 
 .metric-card span,
 .metric-grid span,
-.result-grid span {
+.result-grid span,
+.target-list span,
+.macro-list span,
+.about-grid span {
   color: var(--muted);
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -213,8 +254,15 @@ a {
   color: var(--muted);
 }
 
-.metric-grid {
+.metric-grid,
+.benefits,
+.result-grid,
+.about-grid {
   display: grid;
+  gap: 1rem;
+}
+
+.metric-grid {
   grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
   margin-top: 0.75rem;
@@ -222,25 +270,26 @@ a {
 
 .metric-grid div,
 .benefits article,
-.result-grid article {
+.result-grid article,
+.about-grid article {
   padding: 1rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
 }
 
 .metric-grid strong,
-.result-grid strong {
+.result-grid strong,
+.target-list strong,
+.macro-list strong,
+.about-grid strong {
   display: block;
   margin-top: 0.4rem;
   color: var(--cyan);
   font-size: 1.5rem;
 }
 
-.benefits,
-.result-grid {
-  display: grid;
+.benefits {
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
 }
 
 .benefits article span {
@@ -254,7 +303,8 @@ a {
 }
 
 .benefits p,
-.result-grid p {
+.result-grid p,
+.progress-list small {
   color: var(--muted);
   line-height: 1.6;
 }
@@ -270,14 +320,24 @@ a {
   font-size: clamp(2.2rem, 3.7vw, 3.35rem);
 }
 
-.calculator-form {
+.calculator-form,
+.progress-form {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   padding: clamp(1rem, 3vw, 2rem);
 }
 
-.calculator-form label {
+.calculator-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.progress-form {
+  grid-template-columns: minmax(130px, 0.75fr) minmax(120px, 0.6fr) minmax(220px, 1fr) auto auto;
+  align-items: end;
+}
+
+.calculator-form label,
+.progress-form label {
   display: grid;
   gap: 0.45rem;
   color: var(--muted);
@@ -285,18 +345,19 @@ a {
 }
 
 .calculator-form input,
-.calculator-form select {
+.calculator-form select,
+.progress-form input {
   width: 100%;
   min-height: 3rem;
   border: 1px solid var(--line);
   background: #07110f;
   color: var(--text);
   padding: 0 0.85rem;
-  font: inherit;
 }
 
 .calculator-form input:focus,
-.calculator-form select:focus {
+.calculator-form select:focus,
+.progress-form input:focus {
   border-color: var(--green);
   outline: none;
 }
@@ -312,9 +373,60 @@ a {
   color: var(--warning);
 }
 
+.section-heading {
+  margin-bottom: 2rem;
+}
+
 .result-grid {
   grid-template-columns: repeat(4, 1fr);
   margin-top: 2rem;
+}
+
+.analytics-grid,
+.progress-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.macro-panel,
+.insight-panel {
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.macro-panel {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(180px, 1fr);
+  align-items: center;
+  gap: 1rem;
+}
+
+.macro-panel h3,
+.insight-panel h3 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+#macroChart,
+#progressChart {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.macro-list,
+.target-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.macro-list div,
+.target-list div {
+  padding: 0.9rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .comparison-table {
@@ -337,41 +449,57 @@ a {
   color: var(--muted);
 }
 
-.chart-placeholder {
+.comparison-table strong {
+  text-align: right;
+}
+
+.progress-layout {
+  grid-template-columns: 1fr;
+}
+
+.progress-shell {
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.progress-list {
   display: grid;
-  align-items: end;
-  min-height: 14rem;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.progress-list div {
+  display: grid;
+  gap: 0.35rem;
   padding: 1rem;
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.chart-placeholder span {
-  display: block;
-  min-height: 30%;
-  background: linear-gradient(180deg, var(--green), rgba(85, 214, 255, 0.38));
+.progress-list span {
+  color: var(--muted);
 }
 
-.chart-placeholder span:nth-child(2) {
-  min-height: 50%;
-}
-
-.chart-placeholder span:nth-child(3) {
-  min-height: 72%;
-}
-
-.chart-placeholder span:nth-child(4) {
-  min-height: 62%;
-}
-
-.progress-shell p {
-  padding: 1rem;
-  margin: 0;
+.progress-list strong {
+  color: var(--green);
+  font-size: 1.35rem;
 }
 
 .about {
   padding-bottom: 7rem;
+}
+
+.about-grid {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 2rem;
+}
+
+@media (max-width: 980px) {
+  .analytics-grid,
+  .macro-panel,
+  .progress-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 860px) {
@@ -392,7 +520,8 @@ a {
   }
 
   .benefits,
-  .result-grid {
+  .result-grid,
+  .about-grid {
     grid-template-columns: 1fr;
   }
 
@@ -402,8 +531,12 @@ a {
 }
 
 @media (max-width: 520px) {
+  .section {
+    width: min(100% - 1rem, 1180px);
+  }
+
   .hero-copy h1 {
-    font-size: 3.6rem;
+    font-size: 3.4rem;
   }
 
   .metric-grid {
@@ -412,5 +545,13 @@ a {
 
   .main-nav a {
     padding: 0.5rem 0.55rem;
+  }
+
+  .comparison-table div {
+    display: grid;
+  }
+
+  .comparison-table strong {
+    text-align: left;
   }
 }

@@ -7,15 +7,27 @@
 - `23.05` — дизайн-план и структура экранов готовы.
 - `24.05` — базовый frontend готов как открываемый статический сайт.
 - `25.05` — схема БД и тестовые данные готовы.
+- Финальная демонстрационная версия — расчет калорий, БЖУ, сравнение, прогресс и графики работают в браузере.
 
 ## Как открыть frontend
-Откройте файл `frontend/public/index.html` в браузере.
+Откройте файл `frontend/public/index.html` в браузере или запустите локальный сервер:
+
+```bash
+cd frontend/public
+python3 -m http.server 8000 --bind 127.0.0.1
+```
+
+После запуска:
+
+```text
+http://127.0.0.1:8000
+```
 
 ## Стек
 - Frontend: HTML, CSS, JavaScript.
 - Backend: Node.js + Express (архитектурный каркас для этапа `26.05`).
 - Database: PostgreSQL.
-- Visualization: Chart.js / Recharts (для этапа графиков).
+- Visualization: Canvas-графики без внешних зависимостей.
 
 ## Документация
 - `docs/architecture.md` — общая архитектура.
@@ -23,3 +35,4 @@
 - `docs/pages-map.md` — карта страниц.
 - `docs/api-contract.md` — черновик API.
 - `docs/db-schema.md` — описание базы данных.
+- `docs/defense-report-25-05.md` — отчет для защиты текущего этапа.

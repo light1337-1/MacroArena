@@ -28,49 +28,52 @@
           <p class="eyebrow">sport nutrition analytics</p>
           <h1>MacroArena</h1>
           <p>
-            Спортшыларға арналған калория, БЖУ және прогресс бақылау dashboard-ы.
-            Жоба дене параметрлері мен жаттығу белсенділігіне сүйеніп тамақтану жоспарын құруға көмектеседі.
+            Спортшыларға арналған толық жұмыс істейтін калория, БЖУ, салыстыру және прогресс бақылау dashboard-ы.
           </p>
-          <a class="primary-action" href="#calculator">Есептеуді бастау</a>
+          <div class="hero-actions">
+            <a class="primary-action" href="#calculator">Есептеуді бастау</a>
+            <a class="ghost-action" href="#results">Нәтижені көру</a>
+          </div>
         </div>
-        <div class="hero-panel" aria-label="Аналитикалық көрсеткіштер">
+
+        <aside class="hero-panel" aria-label="Аналитикалық көрсеткіштер">
           <div class="metric-card">
             <span>Daily target</span>
-            <strong>2700-3100</strong>
-            <small>ккал диапазоны</small>
+            <strong id="heroCalories">2700-3100</strong>
+            <small id="heroGoal">ккал диапазоны</small>
           </div>
           <div class="metric-grid">
             <div>
               <span>Protein</span>
-              <strong>150g</strong>
+              <strong id="heroProtein">150g</strong>
             </div>
             <div>
               <span>Fat</span>
-              <strong>80g</strong>
+              <strong id="heroFat">80g</strong>
             </div>
             <div>
               <span>Carbs</span>
-              <strong>390g</strong>
+              <strong id="heroCarbs">390g</strong>
             </div>
           </div>
-        </div>
+        </aside>
       </section>
 
       <section class="section benefits" aria-label="Артықшылықтар">
         <article>
           <span>01</span>
           <h2>Жеке есептеу</h2>
-          <p>Салмақ, бой, жас, жыныс, спорт түрі және мақсат негізінде тамақтану нормасы жоспарланады.</p>
+          <p>Жас, жыныс, салмақ, бой, спорт және белсенділік бойынша нақты күндік норма шығарылады.</p>
         </article>
         <article>
           <span>02</span>
-          <h2>БЖУ құрылымы</h2>
-          <p>Ақуыз, май және көмірсу мөлшері бөлек көрсетіліп, күнделікті рационды түсінікті етеді.</p>
+          <h2>БЖУ балансы</h2>
+          <p>Ақуыз, май және көмірсу граммен көрсетіліп, рационды жоспарлауға ыңғайлы болады.</p>
         </article>
         <article>
           <span>03</span>
-          <h2>Салыстыру</h2>
-          <p>Пайдаланушы нәтижесі ұқсас спортшылардың орташа көрсеткіштерімен салыстырылады.</p>
+          <h2>Аналитика</h2>
+          <p>Нәтиже ұқсас спортшылардың орташа деректерімен салыстырылып, қысқа қорытынды беріледі.</p>
         </article>
       </section>
 
@@ -79,7 +82,7 @@
           <p class="eyebrow">calculator</p>
           <h2>Спортшы деректері</h2>
           <p class="section-copy">
-            Бұл 24.05 кезеңіндегі бастапқы форма. Нақты есептеу және backend-ке сақтау келесі кезеңдерде қосылады.
+            Форманы толтырып, мақсатты таңдаңыз. Сайт бірден BMR, күндік калория, БЖУ және салыстыру нәтижесін есептейді.
           </p>
         </div>
 
@@ -112,13 +115,13 @@
             Спорт түрі
             <select name="sport" required>
               <option value="">Таңдау</option>
-              <option>Футбол</option>
-              <option>Бокс</option>
-              <option>Жүгіру</option>
-              <option>Жүзу</option>
-              <option>Фитнес</option>
-              <option>Баскетбол</option>
-              <option>Велоспорт</option>
+              <option value="football">Футбол</option>
+              <option value="boxing">Бокс</option>
+              <option value="running">Жүгіру</option>
+              <option value="swimming">Жүзу</option>
+              <option value="fitness">Фитнес</option>
+              <option value="basketball">Баскетбол</option>
+              <option value="cycling">Велоспорт</option>
             </select>
           </label>
           <label>
@@ -154,29 +157,59 @@
       </section>
 
       <section id="results" class="section">
-        <p class="eyebrow">results</p>
-        <h2>Нәтиже бетінің құрылымы</h2>
+        <div class="section-heading">
+          <p class="eyebrow">results</p>
+          <h2>Есептеу нәтижесі</h2>
+          <p id="resultSummary">Алдымен калькулятор формасын толтырыңыз.</p>
+        </div>
+
         <div class="result-grid">
           <article>
             <span>BMR</span>
-            <strong>--</strong>
+            <strong id="bmrValue">--</strong>
             <p>Базалық энергия шығыны.</p>
           </article>
           <article>
             <span>Maintenance</span>
-            <strong>--</strong>
+            <strong id="maintenanceValue">--</strong>
             <p>Салмақты сақтау калориясы.</p>
           </article>
           <article>
             <span>Gain</span>
-            <strong>--</strong>
-            <p>Масса жинау калориясы.</p>
+            <strong id="gainValue">--</strong>
+            <p>Бұлшықет массасын жинау.</p>
           </article>
           <article>
             <span>Loss</span>
-            <strong>--</strong>
+            <strong id="lossValue">--</strong>
             <p>Салмақ азайту калориясы.</p>
           </article>
+        </div>
+
+        <div class="analytics-grid">
+          <section class="macro-panel" aria-label="БЖУ диаграммасы">
+            <div>
+              <p class="eyebrow">macros</p>
+              <h3>БЖУ құрылымы</h3>
+            </div>
+            <canvas id="macroChart" width="320" height="240" aria-label="БЖУ диаграммасы"></canvas>
+            <div class="macro-list">
+              <div><span>Ақуыз</span><strong id="proteinValue">--</strong></div>
+              <div><span>Май</span><strong id="fatValue">--</strong></div>
+              <div><span>Көмірсу</span><strong id="carbsValue">--</strong></div>
+            </div>
+          </section>
+
+          <section class="insight-panel" aria-label="Қысқаша ұсыныс">
+            <p class="eyebrow">coach note</p>
+            <h3 id="goalTitle">Ұсыныс</h3>
+            <p id="goalInsight">Есептеу жасалғаннан кейін қысқаша ұсыныс осы жерде шығады.</p>
+            <div class="target-list">
+              <div><span>Таңдалған мақсат</span><strong id="selectedGoal">--</strong></div>
+              <div><span>Күндік мақсат</span><strong id="targetCalories">--</strong></div>
+              <div><span>Белсенділік коэффициенті</span><strong id="activityFactor">--</strong></div>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -184,41 +217,63 @@
         <div>
           <p class="eyebrow">comparison</p>
           <h2>Ұқсас спортшылармен салыстыру</h2>
-          <p class="section-copy">
-            Бұл бөлім `athlete_data` кестесіндегі жас, салмақ, бой, спорт түрі, белсенділік және мақсат көрсеткіштеріне сүйенеді.
+          <p class="section-copy" id="comparisonSummary">
+            Есептеуден кейін мұнда ұқсас спортшылардың орташа көрсеткіштерімен салыстыру шығады.
           </p>
         </div>
         <div class="comparison-table" role="table" aria-label="Салыстыру көрсеткіштері">
           <div role="row">
             <span role="cell">Ұқсас спортшылар</span>
-            <strong role="cell">--</strong>
+            <strong role="cell" id="similarCount">--</strong>
           </div>
           <div role="row">
             <span role="cell">Орташа салмақ</span>
-            <strong role="cell">-- кг</strong>
+            <strong role="cell" id="averageWeight">-- кг</strong>
           </div>
           <div role="row">
             <span role="cell">Орташа бой</span>
-            <strong role="cell">-- см</strong>
+            <strong role="cell" id="averageHeight">-- см</strong>
           </div>
           <div role="row">
             <span role="cell">Орташа калория</span>
-            <strong role="cell">-- ккал</strong>
+            <strong role="cell" id="averageCalories">-- ккал</strong>
+          </div>
+          <div role="row">
+            <span role="cell">Айырмашылық</span>
+            <strong role="cell" id="calorieDifference">--</strong>
           </div>
         </div>
       </section>
 
       <section id="progress" class="section">
-        <p class="eyebrow">progress</p>
-        <h2>Прогресс бақылау</h2>
-        <div class="progress-shell">
-          <div class="chart-placeholder" aria-label="График орны">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <p>25.05 кезеңінде база құрылымы дайын. Нақты график пен апталық сақтау логикасы кейін backend-пен байланысады.</p>
+        <div class="section-heading">
+          <p class="eyebrow">progress</p>
+          <h2>Прогресс бақылау</h2>
+          <p id="progressSummary">Апта сайын салмақ енгізіп, өзгеріс бағытын бақылаңыз.</p>
+        </div>
+
+        <div class="progress-layout">
+          <form class="progress-form" id="progressForm">
+            <label>
+              Күні
+              <input name="date" type="date" required>
+            </label>
+            <label>
+              Салмақ, кг
+              <input name="weight" type="number" min="30" max="220" step="0.1" placeholder="72.5" required>
+            </label>
+            <label>
+              Ескерту
+              <input name="note" type="text" placeholder="Жаттығу аптасы жақсы өтті">
+            </label>
+            <button class="primary-action" type="submit">Қосу</button>
+            <button class="ghost-button" type="button" id="clearProgress">Тазалау</button>
+          </form>
+
+          <section class="progress-shell">
+            <canvas id="progressChart" width="720" height="260" aria-label="Салмақ прогресс графигі"></canvas>
+            <div class="progress-list" id="progressList"></div>
+          </section>
         </div>
       </section>
 
@@ -226,9 +281,23 @@
         <p class="eyebrow">about</p>
         <h2>Жоба туралы</h2>
         <p>
-          MacroArena спортпен айналысатын оқушыларға, студенттерге, фитнес қолданушыларына және кәсіби емес спортшыларға арналған.
-          Қолданылған бағыттар: HTML, CSS, JavaScript, Node.js архитектурасы және PostgreSQL деректер базасы.
+          MacroArena спортпен айналысатын оқушыларға, студенттерге, фитнес қолданушыларына және салмағын бақылағысы келетін адамдарға арналған.
+          Қазіргі нұсқада калькулятор, БЖУ диаграммасы, ұқсас спортшылармен салыстыру және салмақ прогресі толық жұмыс істейді.
         </p>
+        <div class="about-grid">
+          <article>
+            <span>Frontend</span>
+            <strong>HTML + CSS + JavaScript</strong>
+          </article>
+          <article>
+            <span>Data</span>
+            <strong>localStorage + seed dataset</strong>
+          </article>
+          <article>
+            <span>Next layer</span>
+            <strong>Node.js API + PostgreSQL</strong>
+          </article>
+        </div>
       </section>
     </main>
 
