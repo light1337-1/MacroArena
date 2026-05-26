@@ -1,15 +1,43 @@
 const form = document.querySelector("#calculatorForm");
 const progressForm = document.querySelector("#progressForm");
 const nutritionForm = document.querySelector("#nutritionForm");
+const registerForm = document.querySelector("#registerForm");
+const loginForm = document.querySelector("#loginForm");
+const profileForm = document.querySelector("#profileForm");
 const formNote = document.querySelector("#formNote");
+const loginNote = document.querySelector("#loginNote");
+const registerNote = document.querySelector("#registerNote");
+const profileNote = document.querySelector("#profileNote");
 const clearProgressButton = document.querySelector("#clearProgress");
 const clearNutritionButton = document.querySelector("#clearNutrition");
+const logoutButton = document.querySelector("#logoutButton");
+const cabinetLogoutButton = document.querySelector("#cabinetLogoutButton");
+const accountSection = document.querySelector("#account");
+const loginModal = document.querySelector("#loginModal");
+const registerModal = document.querySelector("#registerModal");
+const openLoginButton = document.querySelector("#openLoginButton");
+const openRegisterButton = document.querySelector("#openRegisterButton");
+const openCabinetButton = document.querySelector("#openCabinetButton");
+const openAccountHeroButton = document.querySelector("#openAccountHeroButton");
+const closeLoginModal = document.querySelector("#closeLoginModal");
+const closeRegisterModal = document.querySelector("#closeRegisterModal");
+const closeCabinetButton = document.querySelector("#closeCabinetButton");
+const switchToRegister = document.querySelector("#switchToRegister");
+const switchToLogin = document.querySelector("#switchToLogin");
+const transferProfileButton = document.querySelector("#transferProfileButton");
+const apiWeatherForm = document.querySelector("#apiWeatherForm");
 
+const accountsKey = "macroarena.accounts";
+const currentUserKey = "macroarena.currentUser";
+const profileKey = "macroarena.profile";
 const draftKey = "macroarena.calculatorDraft";
 const resultKey = "macroarena.latestResult";
 const progressKey = "macroarena.progress";
 const foodKey = "macroarena.foodText";
 const foodHistoryKey = "macroarena.foodHistory";
+const apiWeatherKey = "macroarena.apiWeather";
+const scopedDataKeys = [draftKey, resultKey, progressKey, foodKey, foodHistoryKey, apiWeatherKey];
+const backendApiUrl = "http://127.0.0.1:3000/api";
 
 const activityFactors = {
   low: 1.25,
@@ -39,6 +67,19 @@ const sportLabels = {
   fitness: "Фитнес",
   basketball: "Баскетбол",
   cycling: "Велоспорт",
+};
+
+const genderLabels = {
+  male: "Мужской",
+  female: "Женский",
+  other: "Не указывать",
+};
+
+const experienceLabels = {
+  beginner: "Новичок",
+  middle: "1-3 года",
+  advanced: "3-5 лет",
+  pro: "Более 5 лет",
 };
 
 const sportProfiles = [
@@ -74,9 +115,219 @@ const bodyVariants = [
   { height: 6, weight: 9 },
 ];
 
-function getJson(key, fallback) {
+function getRawJson(key, fallback) {
   try {
     return JSON.parse(localStorage.getItem(key)) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function setRawJson(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function normalizeEmail(email) {
+  return String(email).trim().toLowerCase();
+}
+
+function hashPassword(password) {
+  let hash = 0;
+
+  for (let index = 0; index < password.length; index += 1) {
+    hash = Math.imul(31, hash) + password.charCodeAt(index);
+    hash |= 0;
+  }
+
+  return `h${(hash >>> 0).toString(36)}`;
+}
+
+function getAccounts() {
+  return getRawJson(accountsKey, []);
+}
+
+function saveAccounts(accounts) {
+  setRawJson(accountsKey, accounts);
+}
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(`${backendApiUrl}${path}`, {
+    method: options.method || "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(data.message || "Backend API error");
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+}
+
+function saveAccountForFrontend(account, password) {
+  const accounts = getAccounts().filter((item) => item.email !== account.email);
+
+  accounts.push({
+    id: account.id || Date.now(),
+    name: account.name,
+    email: account.email,
+    passwordHash: password ? hashPassword(password) : "",
+    createdAt: account.createdAt || new Date().toISOString(),
+  });
+
+  saveAccounts(accounts);
+}
+
+function getCurrentUserEmail() {
+  return normalizeEmail(localStorage.getItem(currentUserKey) || "");
+}
+
+function getCurrentUser() {
+  const email = getCurrentUserEmail();
+
+  if (!email) {
+    return null;
+  }
+
+  return getAccounts().find((account) => account.email === email) || null;
+}
+
+function toUserDataKey(email, key) {
+  return `macroarena.user.${normalizeEmail(email)}.${key}`;
+}
+
+function getScopedKey(key) {
+  const email = getCurrentUserEmail();
+  return email ? toUserDataKey(email, key) : key;
+}
+
+function getStorageItem(key) {
+  return localStorage.getItem(getScopedKey(key));
+}
+
+function setStorageItem(key, value) {
+  localStorage.setItem(getScopedKey(key), value);
+  renderAccountDashboard();
+  renderBigDataDashboard();
+}
+
+function removeStorageItem(key) {
+  localStorage.removeItem(getScopedKey(key));
+  renderAccountDashboard();
+  renderBigDataDashboard();
+}
+
+function updateAuthButtons(account = getCurrentUser()) {
+  const isLoggedIn = Boolean(account);
+
+  if (openLoginButton) {
+    openLoginButton.hidden = isLoggedIn;
+  }
+
+  if (openRegisterButton) {
+    openRegisterButton.hidden = isLoggedIn;
+  }
+
+  if (openCabinetButton) {
+    openCabinetButton.hidden = !isLoggedIn;
+    openCabinetButton.setAttribute("aria-controls", "account");
+  }
+
+  if (logoutButton) {
+    logoutButton.hidden = !isLoggedIn;
+  }
+
+  if (openAccountHeroButton) {
+    openAccountHeroButton.textContent = isLoggedIn ? "Кабинетке кіру" : "Войти / тіркелу";
+  }
+}
+
+function setModalState(isOpen) {
+  document.body.classList.toggle("account-open", isOpen);
+}
+
+function closeAuthModals() {
+  if (loginModal) {
+    loginModal.hidden = true;
+  }
+
+  if (registerModal) {
+    registerModal.hidden = true;
+  }
+
+  setModalState(false);
+}
+
+function openAuthModal(type) {
+  closeAuthModals();
+  setText("loginNote", "");
+  setText("registerNote", "");
+
+  const modal = type === "register" ? registerModal : loginModal;
+
+  if (!modal) {
+    return;
+  }
+
+  modal.hidden = false;
+  setModalState(true);
+  updateAuthButtons();
+  modal.querySelector("input, button")?.focus();
+}
+
+function isCabinetHash() {
+  return window.location.hash === "#cabinet" || window.location.hash === "#account";
+}
+
+function hideCabinet() {
+  if (accountSection) {
+    accountSection.hidden = true;
+  }
+
+  document.body.classList.remove("cabinet-page");
+}
+
+function showCabinet() {
+  const account = getCurrentUser();
+
+  if (!account) {
+    hideCabinet();
+    openAuthModal("login");
+    setText("loginNote", "Сначала войдите или зарегистрируйтесь.");
+    return;
+  }
+
+  if (accountSection) {
+    accountSection.hidden = false;
+    document.body.classList.add("cabinet-page");
+    renderAccountDashboard();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+function goToCabinetPage() {
+  if (!getCurrentUser()) {
+    showCabinet();
+    return;
+  }
+
+  if (window.location.hash === "#cabinet") {
+    showCabinet();
+  } else {
+    window.location.hash = "cabinet";
+  }
+}
+
+function getJson(key, fallback) {
+  try {
+    return JSON.parse(getStorageItem(key)) ?? fallback;
   } catch {
     return fallback;
   }
@@ -121,9 +372,14 @@ function collectFormValues() {
 }
 
 function restoreDraft() {
+  if (!form) {
+    return;
+  }
+
+  form.reset();
   const values = getJson(draftKey, null);
 
-  if (!values || !form) {
+  if (!values) {
     return;
   }
 
@@ -427,7 +683,7 @@ function getFoodHistory() {
 }
 
 function saveFoodHistory(items) {
-  localStorage.setItem(foodHistoryKey, JSON.stringify(items));
+  setStorageItem(foodHistoryKey, JSON.stringify(items));
 }
 
 function getItemTotals(items) {
@@ -671,6 +927,644 @@ function renderResults(payload) {
   renderSimilarProfiles(similarAthletes.slice(0, 5));
 }
 
+function renderEmptyResults() {
+  setText("heroCalories", "2700-3100");
+  setText("heroGoal", "ккал диапазоны");
+  setText("heroProtein", "150g");
+  setText("heroFat", "80g");
+  setText("heroCarbs", "390g");
+  setText("bmrValue", "--");
+  setText("maintenanceValue", "--");
+  setText("gainValue", "--");
+  setText("lossValue", "--");
+  setText("proteinValue", "--");
+  setText("fatValue", "--");
+  setText("carbsValue", "--");
+  setText("selectedGoal", "--");
+  setText("targetCalories", "--");
+  setText("activityFactor", "--");
+  setText("goalTitle", "Ұсыныс");
+  setText("resultSummary", "Алдымен калькулятор формасын толтырыңыз.");
+  setText("goalInsight", "Есептеу жасалғаннан кейін қысқаша ұсыныс осы жерде шығады.");
+  setText("datasetSize", "--");
+  setText("similarCount", "--");
+  setText("matchQuality", "--");
+  setText("calorieRange", "--");
+  setText("averageWeight", "-- кг");
+  setText("averageHeight", "-- см");
+  setText("averageCalories", "-- ккал");
+  setText("calorieDifference", "--");
+  setText("caloriePercentile", "--");
+  setText("comparisonSummary", "Есептеуден кейін мұнда ұқсас спортшылардың орташа көрсеткіштерімен салыстыру шығады.");
+  setText("profileSummary", "Есептеуден кейін ең жақын 5 спортшы профилі көрсетіледі.");
+
+  const similarProfiles = document.querySelector("#similarProfiles");
+
+  if (similarProfiles) {
+    similarProfiles.innerHTML = "";
+  }
+
+  drawMacroChart({ protein: 150, fat: 80, carbs: 390, targetCalories: 2900 });
+}
+
+function countFilledValues(value) {
+  if (!value) {
+    return 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length;
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value).filter((item) => item !== "" && item !== null && item !== undefined).length;
+  }
+
+  return value || value === 0 ? 1 : 0;
+}
+
+function getTopSportSegments() {
+  return Object.keys(sportLabels)
+    .map((sport) => {
+      const items = athleteData.filter((athlete) => athlete.sport === sport);
+
+      return {
+        sport,
+        count: items.length,
+        averageCalories: round(average(items, "averageCalories")),
+        averageWeight: round(average(items, "weight")),
+      };
+    })
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+}
+
+function getDefaultApiCity() {
+  const profile = getProfileData();
+  return profile.city || "Almaty";
+}
+
+function getWeatherAdvice(temperature, windSpeed, rain) {
+  if (rain > 1) {
+    return "Есть осадки. Для уличной тренировки лучше выбрать зал или снизить интенсивность.";
+  }
+
+  if (windSpeed > 12) {
+    return "Сильный ветер. Лучше избегать длительного бега на открытых участках.";
+  }
+
+  if (temperature < -5) {
+    return "Очень холодно. Нужна хорошая разминка и короткие интервалы.";
+  }
+
+  if (temperature > 30) {
+    return "Жарко. Пейте больше воды и тренируйтесь утром или вечером.";
+  }
+
+  return "Погода подходит для обычной тренировки.";
+}
+
+async function loadWeatherDirectly(city) {
+  const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=ru&format=json`;
+  const geoResponse = await fetch(geoUrl);
+
+  if (!geoResponse.ok) {
+    throw new Error("Geocoding API недоступен");
+  }
+
+  const geoData = await geoResponse.json();
+  const place = geoData.results?.[0];
+
+  if (!place) {
+    throw new Error("Город не найден");
+  }
+
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,wind_speed_10m,rain&timezone=auto`;
+  const weatherResponse = await fetch(weatherUrl);
+
+  if (!weatherResponse.ok) {
+    throw new Error("Forecast API недоступен");
+  }
+
+  const weatherData = await weatherResponse.json();
+  const current = weatherData.current || {};
+  const payload = {
+    city: place.name,
+    country: place.country || "",
+    temperature: Math.round(current.temperature_2m),
+    windSpeed: Math.round(current.wind_speed_10m || 0),
+    rain: Number(current.rain || 0),
+    updatedAt: new Date().toISOString(),
+  };
+
+  payload.advice = getWeatherAdvice(payload.temperature, payload.windSpeed, payload.rain);
+
+  return payload;
+}
+
+function renderApiWeather(data) {
+  const cityInput = apiWeatherForm?.elements.city;
+
+  if (cityInput && !cityInput.value) {
+    cityInput.value = data?.city || getDefaultApiCity();
+  }
+
+  if (!data) {
+    setText("apiWeatherCity", "--");
+    setText("apiWeatherTemp", "--");
+    setText("apiWeatherWind", "--");
+    setText("apiWeatherRain", "--");
+    setText("apiWeatherAdvice", "Нажмите кнопку, чтобы получить данные из внешнего API.");
+    return;
+  }
+
+  setText("apiWeatherCity", `${data.city}, ${data.country}`);
+  setText("apiWeatherTemp", `${data.temperature} °C`);
+  setText("apiWeatherWind", `${data.windSpeed} км/ч`);
+  setText("apiWeatherRain", `${data.rain} мм`);
+  setText("apiWeatherAdvice", `${data.advice} Обновлено: ${formatDateTime(data.updatedAt)}.`);
+}
+
+async function loadWeatherFromApi(city) {
+  const normalizedCity = String(city || "").trim();
+
+  if (!normalizedCity) {
+    setText("apiWeatherStatus", "Введите город, чтобы запросить данные из API.");
+    return;
+  }
+
+  setText("apiWeatherStatus", "Запрашиваем город в Open-Meteo Geocoding API...");
+
+  try {
+    setText("apiWeatherStatus", "Запрашиваем погоду через backend API...");
+    const payload = await apiRequest("/weather", {
+      method: "POST",
+      body: { city: normalizedCity },
+    });
+
+    setStorageItem(apiWeatherKey, JSON.stringify(payload));
+    renderApiWeather(payload);
+    setText("apiWeatherStatus", "Backend получил данные из внешнего API Open-Meteo.");
+  } catch {
+    try {
+      setText("apiWeatherStatus", "Backend недоступен. Пробуем прямой запрос к Open-Meteo...");
+      const payload = await loadWeatherDirectly(normalizedCity);
+
+      setStorageItem(apiWeatherKey, JSON.stringify(payload));
+      renderApiWeather(payload);
+      setText("apiWeatherStatus", "Данные получены напрямую из Open-Meteo, без backend.");
+    } catch {
+      setText("apiWeatherStatus", "Не удалось получить данные из API. Проверьте backend, интернет или название города.");
+    }
+  }
+}
+
+function renderBigDataDashboard() {
+  const latest = getJson(resultKey, null);
+  const profile = getProfileData();
+  const progress = getProgress();
+  const history = getFoodHistory();
+  const values = latest?.values || getJson(draftKey, null);
+  const userRecordCount =
+    (hasProfileData(profile) ? 1 : 0) +
+    (values ? 1 : 0) +
+    history.length +
+    progress.length;
+  const filledFields =
+    countFilledValues(profile) +
+    countFilledValues(values) +
+    countFilledValues(latest?.nutrition) +
+    countFilledValues(history) +
+    countFilledValues(progress);
+  const averageCalories = round(average(athleteData, "averageCalories"));
+  const matches = latest?.similarAthletes?.length || 0;
+  const segments = getTopSportSegments();
+  const segmentList = document.querySelector("#bigDataSegments");
+  const userCalories = latest?.nutrition?.targetCalories;
+  const userSport = values?.sport;
+  const userGoal = values?.goal;
+  const savedApiWeather = getJson(apiWeatherKey, null);
+
+  setText("bigDataRecords", `${athleteData.length + userRecordCount}`);
+  setText("bigDataFields", `${filledFields}`);
+  setText("bigDataMatches", `${matches || "--"}`);
+  setText("bigDataAverageCalories", `${averageCalories} ккал`);
+  setText(
+    "bigDataSummary",
+    `В демо анализируется ${athleteData.length} спортсменов из локального датасета и ${userRecordCount} записей текущего пользователя. В реальном Big Data проекте эти записи отправлялись бы в backend и общую базу.`,
+  );
+
+  if (segmentList) {
+    segmentList.innerHTML = segments.map((segment) => `
+      <article>
+        <span>${escapeHtml(sportLabels[segment.sport])}</span>
+        <strong>${segment.count} профилей</strong>
+        <p>Среднее: ${segment.averageCalories} ккал, ${segment.averageWeight} кг.</p>
+      </article>
+    `).join("");
+  }
+
+  if (userCalories && matches) {
+    const similarAverage = round(average(latest.similarAthletes, "averageCalories"));
+    const difference = userCalories - similarAverage;
+
+    setText(
+      "bigDataInsight",
+      `Ваш профиль сравнен с ${matches} похожими спортсменами по спорту "${sportLabels[userSport]}" и цели "${goalLabels[userGoal]}". Средняя калорийность похожей группы: ${similarAverage} ккал. Ваша норма: ${userCalories} ккал, разница ${formatSigned(difference)} ккал.`,
+    );
+  } else {
+    setText(
+      "bigDataInsight",
+      "Заполните калькулятор, чтобы система сравнила вас с демо-датасетом спортсменов и показала персональный вывод.",
+    );
+  }
+
+  renderApiWeather(savedApiWeather);
+}
+
+function renderRows(containerId, rows, emptyMessage) {
+  const container = document.querySelector(`#${containerId}`);
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = rows.length
+    ? rows.map((row) => `
+        <div>
+          <span>${escapeHtml(row.label)}</span>
+          <strong>${escapeHtml(row.value)}</strong>
+        </div>
+      `).join("")
+    : `<p>${escapeHtml(emptyMessage)}</p>`;
+}
+
+function displayValue(value) {
+  return value || value === 0 ? String(value) : "--";
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return "--";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function renderDataGroup(title, rows) {
+  return `
+    <section class="data-group">
+      <h4>${escapeHtml(title)}</h4>
+      ${rows.map((row) => `
+        <div class="data-row${row.wide ? " data-row-wide" : ""}">
+          <span>${escapeHtml(row.label)}</span>
+          <strong>${escapeHtml(displayValue(row.value))}</strong>
+        </div>
+      `).join("")}
+    </section>
+  `;
+}
+
+function getProfileData() {
+  return getJson(profileKey, {});
+}
+
+function getProfileFormValues() {
+  if (!profileForm) {
+    return {};
+  }
+
+  const values = Object.fromEntries(new FormData(profileForm).entries());
+
+  return {
+    fullName: values.fullName.trim(),
+    phone: values.phone.trim(),
+    city: values.city.trim(),
+    birthDate: values.birthDate,
+    gender: values.gender,
+    height: values.height,
+    weight: values.weight,
+    sport: values.sport,
+    goal: values.goal,
+    experience: values.experience,
+    nickname: values.nickname.trim(),
+    about: values.about.trim(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function fillProfileForm(profile, account) {
+  if (!profileForm) {
+    return;
+  }
+
+  const defaults = {
+    fullName: profile.fullName || account.name || "",
+    phone: "",
+    city: "",
+    birthDate: "",
+    gender: "",
+    height: "",
+    weight: "",
+    sport: "",
+    goal: "",
+    experience: "",
+    nickname: "",
+    about: "",
+  };
+
+  Object.entries(defaults).forEach(([name, defaultValue]) => {
+    const field = profileForm.elements[name];
+
+    if (field) {
+      field.value = profile[name] ?? defaultValue;
+    }
+  });
+}
+
+function hasProfileData(profile) {
+  return Object.entries(profile).some(([key, value]) => key !== "updatedAt" && Boolean(value));
+}
+
+function renderAccountDashboard() {
+  const account = getCurrentUser();
+  const allData = document.querySelector("#cabinetAllData");
+
+  updateAuthButtons(account);
+
+  if (!account) {
+    hideCabinet();
+    return;
+  }
+
+  const profile = getProfileData();
+  const latest = getJson(resultKey, null);
+  const draft = getJson(draftKey, null);
+  const values = latest?.values || draft;
+  const history = getFoodHistory();
+  const progress = getProgress().sort((a, b) => a.date.localeCompare(b.date));
+  const foodText = getStorageItem(foodKey) || "";
+  const nutrition = latest?.nutrition;
+  const latestTotals = getItemTotals(history.flatMap((meal) => meal.items || []));
+
+  fillProfileForm(profile, account);
+  setText("accountName", `${account.name} / ${account.email}`);
+  setText(
+    "accountStatus",
+    `Аккаунт создан ${new Date(account.createdAt).toLocaleDateString("ru-RU")}. Все данные сохраняются локально на этом устройстве.`,
+  );
+
+  renderRows("cabinetProfile", hasProfileData(profile) ? [
+    { label: "ФИО", value: profile.fullName || account.name },
+    { label: "Никнейм", value: profile.nickname || "--" },
+    { label: "Телефон", value: profile.phone || "--" },
+    { label: "Город", value: profile.city || "--" },
+    { label: "Дата рождения", value: profile.birthDate || "--" },
+    { label: "Пол", value: genderLabels[profile.gender] || "--" },
+    { label: "Рост", value: profile.height ? `${profile.height} см` : "--" },
+    { label: "Вес", value: profile.weight ? `${profile.weight} кг` : "--" },
+    { label: "Спорт", value: sportLabels[profile.sport] || "--" },
+    { label: "Цель", value: goalLabels[profile.goal] || "--" },
+    { label: "Опыт", value: experienceLabels[profile.experience] || "--" },
+    { label: "О себе", value: profile.about || "--" },
+  ] : [], "Пока нет данных. Заполните форму кабинета.");
+
+  renderRows("cabinetCalculation", nutrition ? [
+    { label: "BMR", value: `${nutrition.bmr} ккал` },
+    { label: "Цель на день", value: `${nutrition.targetCalories} ккал` },
+    { label: "Поддержание", value: `${nutrition.maintenanceCalories} ккал` },
+    { label: "Набор", value: `${nutrition.gainCalories} ккал` },
+    { label: "Снижение", value: `${nutrition.lossCalories} ккал` },
+    { label: "БЖУ", value: `${nutrition.protein}г / ${nutrition.fat}г / ${nutrition.carbs}г` },
+  ] : [], "После расчета здесь появятся калории и БЖУ.");
+
+  renderRows("cabinetNutrition", history.length || foodText ? [
+    { label: "Черновик еды", value: foodText || "Пусто" },
+    { label: "Приемов пищи", value: `${history.length}` },
+    { label: "Съедено", value: `${latestTotals.calories} ккал` },
+    { label: "БЖУ за историю", value: `${latestTotals.protein}г / ${latestTotals.fat}г / ${latestTotals.carbs}г` },
+    { label: "Вода", value: `${latestTotals.water} мл` },
+  ] : [], "Добавьте прием пищи, чтобы увидеть историю.");
+
+  renderRows("cabinetProgress", progress.length ? [
+    { label: "Записей веса", value: `${progress.length}` },
+    { label: "Первый вес", value: `${progress[0].weight} кг` },
+    { label: "Последний вес", value: `${progress[progress.length - 1].weight} кг` },
+    { label: "Последняя дата", value: progress[progress.length - 1].date },
+    { label: "Динамика", value: `${formatSigned(Number((progress[progress.length - 1].weight - progress[0].weight).toFixed(1)))} кг` },
+  ] : [], "Добавьте вес, чтобы увидеть динамику.");
+
+  if (allData) {
+    const lastMeal = history[history.length - 1];
+    const lastProgress = progress[progress.length - 1];
+
+    allData.innerHTML = [
+      renderDataGroup("Аккаунт", [
+        { label: "Имя", value: account.name },
+        { label: "Email", value: account.email },
+        { label: "Дата регистрации", value: formatDateTime(account.createdAt) },
+      ]),
+      renderDataGroup("Личный профиль", [
+        { label: "ФИО", value: profile.fullName || account.name },
+        { label: "Телефон", value: profile.phone },
+        { label: "Город", value: profile.city },
+        { label: "Дата рождения", value: profile.birthDate },
+        { label: "Пол", value: genderLabels[profile.gender] },
+        { label: "Рост", value: profile.height ? `${profile.height} см` : "" },
+        { label: "Вес", value: profile.weight ? `${profile.weight} кг` : "" },
+        { label: "Спорт", value: sportLabels[profile.sport] },
+        { label: "Цель", value: goalLabels[profile.goal] },
+        { label: "Опыт", value: experienceLabels[profile.experience] },
+        { label: "Никнейм", value: profile.nickname },
+        { label: "О себе", value: profile.about, wide: true },
+        { label: "Обновлено", value: formatDateTime(profile.updatedAt) },
+      ]),
+      renderDataGroup("Данные калькулятора", [
+        { label: "Имя", value: values?.name },
+        { label: "Возраст", value: values?.age ? `${values.age} лет` : "" },
+        { label: "Пол", value: genderLabels[values?.gender] || (values?.gender === "male" ? "Мужской" : values?.gender === "female" ? "Женский" : "") },
+        { label: "Рост", value: values?.height ? `${values.height} см` : "" },
+        { label: "Вес", value: values?.weight ? `${values.weight} кг` : "" },
+        { label: "Спорт", value: sportLabels[values?.sport] },
+        { label: "Тренировок в неделю", value: values?.trainingDays },
+        { label: "Длительность", value: values?.trainingDuration ? `${values.trainingDuration} мин` : "" },
+        { label: "Активность", value: activityLabels[values?.activityLevel] },
+        { label: "Цель", value: goalLabels[values?.goal] },
+      ]),
+      renderDataGroup("Последний расчет", [
+        { label: "Дата расчета", value: formatDateTime(latest?.createdAt) },
+        { label: "BMR", value: nutrition ? `${nutrition.bmr} ккал` : "" },
+        { label: "Цель на день", value: nutrition ? `${nutrition.targetCalories} ккал` : "" },
+        { label: "Поддержание", value: nutrition ? `${nutrition.maintenanceCalories} ккал` : "" },
+        { label: "Набор", value: nutrition ? `${nutrition.gainCalories} ккал` : "" },
+        { label: "Снижение", value: nutrition ? `${nutrition.lossCalories} ккал` : "" },
+        { label: "Белки", value: nutrition ? `${nutrition.protein} г` : "" },
+        { label: "Жиры", value: nutrition ? `${nutrition.fat} г` : "" },
+        { label: "Углеводы", value: nutrition ? `${nutrition.carbs} г` : "" },
+      ]),
+      renderDataGroup("Рацион", [
+        { label: "Черновик", value: foodText || "Пусто" },
+        { label: "Приемов пищи", value: history.length },
+        { label: "Последний прием", value: lastMeal?.text },
+        { label: "Калории", value: `${latestTotals.calories} ккал` },
+        { label: "БЖУ", value: `${latestTotals.protein}г / ${latestTotals.fat}г / ${latestTotals.carbs}г` },
+        { label: "Вода", value: `${latestTotals.water} мл` },
+      ]),
+      renderDataGroup("Прогресс", [
+        { label: "Записей веса", value: progress.length },
+        { label: "Первый вес", value: progress[0] ? `${progress[0].weight} кг` : "" },
+        { label: "Последний вес", value: lastProgress ? `${lastProgress.weight} кг` : "" },
+        { label: "Последняя дата", value: lastProgress?.date },
+        { label: "Последняя заметка", value: lastProgress?.note, wide: true },
+      ]),
+    ].join("");
+  }
+}
+
+function copyGuestDataToUser(email) {
+  const hasUserData = scopedDataKeys.some((key) => localStorage.getItem(toUserDataKey(email, key)) !== null);
+
+  if (hasUserData) {
+    return;
+  }
+
+  scopedDataKeys.forEach((key) => {
+    const value = localStorage.getItem(key);
+
+    if (value !== null) {
+      localStorage.setItem(toUserDataKey(email, key), value);
+    }
+  });
+}
+
+async function saveProfileData() {
+  const account = getCurrentUser();
+
+  if (!account) {
+    openAuthModal("login");
+    setText("loginNote", "Сначала войдите, чтобы сохранить кабинет.");
+    return;
+  }
+
+  const profile = getProfileFormValues();
+  setStorageItem(profileKey, JSON.stringify(profile));
+
+  try {
+    const result = await apiRequest(`/users/${encodeURIComponent(account.email)}/profile`, {
+      method: "PUT",
+      body: { profile },
+    });
+
+    setStorageItem(profileKey, JSON.stringify(result.profile));
+    setText("profileNote", "Данные сохранены в backend.");
+  } catch {
+    setText("profileNote", "Данные сохранены локально. Backend недоступен или пользователь есть только в localStorage.");
+  }
+}
+
+function setCalculatorField(name, value) {
+  const field = form?.elements[name];
+
+  if (field && value) {
+    field.value = value;
+    return true;
+  }
+
+  return false;
+}
+
+function transferProfileToCalculator() {
+  if (!form || !profileForm) {
+    setText("profileNote", "Калькулятор на странице не найден.");
+    return;
+  }
+
+  const profile = getProfileFormValues();
+  const transferData = {};
+
+  if (profile.fullName || profile.nickname) {
+    transferData.name = profile.fullName || profile.nickname;
+  }
+
+  if (profile.gender && profile.gender !== "other") {
+    transferData.gender = profile.gender;
+  }
+
+  ["height", "weight", "sport", "goal"].forEach((name) => {
+    if (profile[name]) {
+      transferData[name] = profile[name];
+    }
+  });
+
+  if (!Object.keys(transferData).length) {
+    setText("profileNote", "Заполните профиль перед переносом в калькулятор.");
+    return;
+  }
+
+  Object.entries(transferData).forEach(([name, value]) => {
+    setCalculatorField(name, value);
+  });
+
+  const savedDraft = getJson(draftKey, {});
+  setStorageItem(draftKey, JSON.stringify({ ...savedDraft, ...transferData }));
+  setText("profileNote", "Рост, вес, цель и спорт перенесены в калькулятор.");
+  window.location.hash = "calculator";
+}
+
+function logoutCurrentUser() {
+  localStorage.removeItem(currentUserKey);
+  closeAuthModals();
+  hideCabinet();
+  setText("profileNote", "");
+  loadAppStateForCurrentScope();
+
+  if (isCabinetHash()) {
+    window.location.hash = "home";
+  }
+}
+
+function loadAppStateForCurrentScope() {
+  restoreDraft();
+
+  const latestResult = getJson(resultKey, null);
+
+  if (latestResult?.values) {
+    const upgradedResult = {
+      ...latestResult,
+      nutrition: calculateNutrition(latestResult.values),
+      similarAthletes: getSimilarAthletes(latestResult.values),
+    };
+
+    setStorageItem(resultKey, JSON.stringify(upgradedResult));
+    renderResults(upgradedResult);
+  } else {
+    renderEmptyResults();
+  }
+
+  const savedFoodText = getStorageItem(foodKey) || "";
+
+  if (nutritionForm?.elements.mealText) {
+    nutritionForm.elements.mealText.value = savedFoodText;
+  }
+
+  renderNutrition(savedFoodText);
+  renderProgress();
+  renderAccountDashboard();
+  renderBigDataDashboard();
+}
+
 function saveCalculation(values) {
   const nutrition = calculateNutrition(values);
   const similarAthletes = getSimilarAthletes(values);
@@ -681,10 +1575,10 @@ function saveCalculation(values) {
     createdAt: new Date().toISOString(),
   };
 
-  localStorage.setItem(draftKey, JSON.stringify(values));
-  localStorage.setItem(resultKey, JSON.stringify(payload));
+  setStorageItem(draftKey, JSON.stringify(values));
+  setStorageItem(resultKey, JSON.stringify(payload));
   renderResults(payload);
-  renderNutrition(localStorage.getItem(foodKey) || "");
+  renderNutrition(getStorageItem(foodKey) || "");
 }
 
 function getProgress() {
@@ -692,7 +1586,7 @@ function getProgress() {
 }
 
 function saveProgress(items) {
-  localStorage.setItem(progressKey, JSON.stringify(items));
+  setStorageItem(progressKey, JSON.stringify(items));
 }
 
 function drawProgressChart(items) {
@@ -801,11 +1695,206 @@ function setDefaultDate() {
   }
 }
 
+openLoginButton?.addEventListener("click", () => {
+  openAuthModal("login");
+});
+
+openRegisterButton?.addEventListener("click", () => {
+  openAuthModal("register");
+});
+
+openCabinetButton?.addEventListener("click", () => {
+  goToCabinetPage();
+});
+
+openAccountHeroButton?.addEventListener("click", () => {
+  if (getCurrentUser()) {
+    goToCabinetPage();
+  } else {
+    openAuthModal("login");
+  }
+});
+
+closeLoginModal?.addEventListener("click", closeAuthModals);
+closeRegisterModal?.addEventListener("click", closeAuthModals);
+closeCabinetButton?.addEventListener("click", () => {
+  window.location.hash = "home";
+});
+
+switchToRegister?.addEventListener("click", () => {
+  openAuthModal("register");
+});
+
+switchToLogin?.addEventListener("click", () => {
+  openAuthModal("login");
+});
+
+[loginModal, registerModal].forEach((modal) => {
+  modal?.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      closeAuthModals();
+    }
+  });
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeAuthModals();
+  }
+});
+
+window.addEventListener("hashchange", () => {
+  if (isCabinetHash()) {
+    showCabinet();
+  } else {
+    hideCabinet();
+  }
+});
+
+if (registerForm) {
+  registerForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(registerForm).entries());
+    const email = normalizeEmail(values.email);
+
+    if (values.password !== values.passwordRepeat) {
+      setText("registerNote", "Пароли не совпадают.");
+      return;
+    }
+
+    try {
+      const result = await apiRequest("/auth/register", {
+        method: "POST",
+        body: {
+          name: values.name.trim(),
+          email,
+          password: values.password,
+          profile: { fullName: values.name.trim() },
+        },
+      });
+
+      saveAccountForFrontend(result.user, values.password);
+      localStorage.setItem(currentUserKey, result.user.email);
+      copyGuestDataToUser(result.user.email);
+      setStorageItem(profileKey, JSON.stringify(result.profile));
+      registerForm.reset();
+      loginForm?.reset();
+      setText("registerNote", "");
+      loadAppStateForCurrentScope();
+      closeAuthModals();
+      goToCabinetPage();
+      setText("profileNote", "Аккаунт создан в backend. Вы вошли автоматически.");
+    } catch (error) {
+      if (error.status) {
+        setText("registerNote", error.message);
+        return;
+      }
+
+      const accounts = getAccounts();
+
+      if (accounts.some((account) => account.email === email)) {
+        setText("registerNote", "Такой email уже зарегистрирован. Попробуйте войти.");
+        return;
+      }
+
+      accounts.push({
+        id: Date.now(),
+        name: values.name.trim(),
+        email,
+        passwordHash: hashPassword(values.password),
+        createdAt: new Date().toISOString(),
+      });
+
+      saveAccounts(accounts);
+      localStorage.setItem(currentUserKey, email);
+      copyGuestDataToUser(email);
+      setStorageItem(profileKey, JSON.stringify({
+        fullName: values.name.trim(),
+        updatedAt: new Date().toISOString(),
+      }));
+      registerForm.reset();
+      loginForm?.reset();
+      setText("registerNote", "");
+      loadAppStateForCurrentScope();
+      closeAuthModals();
+      goToCabinetPage();
+      setText("profileNote", "Backend недоступен. Аккаунт создан локально в браузере.");
+    }
+  });
+}
+
+if (loginForm) {
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(loginForm).entries());
+    const email = normalizeEmail(values.email);
+
+    try {
+      const result = await apiRequest("/auth/login", {
+        method: "POST",
+        body: {
+          email,
+          password: values.password,
+        },
+      });
+
+      saveAccountForFrontend(result.user, values.password);
+      localStorage.setItem(currentUserKey, result.user.email);
+      setStorageItem(profileKey, JSON.stringify(result.profile || {}));
+      loginForm.reset();
+      setText("loginNote", "");
+      loadAppStateForCurrentScope();
+      closeAuthModals();
+      goToCabinetPage();
+      setText("profileNote", "Вход выполнен через backend. Кабинет загружен.");
+    } catch (error) {
+      if (error.status) {
+        setText("loginNote", error.message);
+        return;
+      }
+
+      const account = getAccounts().find((item) => item.email === email);
+
+      if (!account || account.passwordHash !== hashPassword(values.password)) {
+        setText("loginNote", "Email или пароль неправильный.");
+        return;
+      }
+
+      localStorage.setItem(currentUserKey, email);
+      loginForm.reset();
+      setText("loginNote", "");
+      loadAppStateForCurrentScope();
+      closeAuthModals();
+      goToCabinetPage();
+      setText("profileNote", "Backend недоступен. Вход выполнен из localStorage.");
+    }
+  });
+}
+
+logoutButton?.addEventListener("click", logoutCurrentUser);
+cabinetLogoutButton?.addEventListener("click", logoutCurrentUser);
+
+if (profileForm) {
+  profileForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveProfileData();
+  });
+}
+
+transferProfileButton?.addEventListener("click", transferProfileToCalculator);
+
+if (apiWeatherForm) {
+  apiWeatherForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    loadWeatherFromApi(apiWeatherForm.elements.city.value);
+  });
+}
+
 if (form) {
   restoreDraft();
 
   form.addEventListener("input", () => {
-    localStorage.setItem(draftKey, JSON.stringify(collectFormValues()));
+    setStorageItem(draftKey, JSON.stringify(collectFormValues()));
   });
 
   form.addEventListener("submit", (event) => {
@@ -818,16 +1907,10 @@ if (form) {
 }
 
 if (nutritionForm) {
-  const savedFoodText = localStorage.getItem(foodKey);
   const textArea = nutritionForm.elements.mealText;
 
-  if (savedFoodText && textArea) {
-    textArea.value = savedFoodText;
-    renderNutrition(savedFoodText);
-  }
-
   textArea?.addEventListener("input", () => {
-    localStorage.setItem(foodKey, textArea.value);
+    setStorageItem(foodKey, textArea.value);
     renderNutrition(textArea.value);
   });
 
@@ -835,7 +1918,7 @@ if (nutritionForm) {
     button.addEventListener("click", () => {
       const current = textArea.value.trim();
       textArea.value = current ? `${current}, ${button.dataset.meal}` : button.dataset.meal;
-      localStorage.setItem(foodKey, textArea.value);
+      setStorageItem(foodKey, textArea.value);
       renderNutrition(textArea.value);
     });
   });
@@ -858,7 +1941,7 @@ if (nutritionForm) {
       });
       saveFoodHistory(history.slice(-12));
       nutritionForm.reset();
-      localStorage.removeItem(foodKey);
+      removeStorageItem(foodKey);
     }
 
     renderNutrition("");
@@ -870,8 +1953,8 @@ if (nutritionForm) {
 
 if (clearNutritionButton) {
   clearNutritionButton.addEventListener("click", () => {
-    localStorage.removeItem(foodKey);
-    localStorage.removeItem(foodHistoryKey);
+    removeStorageItem(foodKey);
+    removeStorageItem(foodHistoryKey);
     if (nutritionForm?.elements.mealText) {
       nutritionForm.elements.mealText.value = "";
     }
@@ -908,20 +1991,10 @@ if (clearProgressButton) {
   });
 }
 
-const latestResult = getJson(resultKey, null);
+loadAppStateForCurrentScope();
 
-if (latestResult?.values) {
-  const upgradedResult = {
-    ...latestResult,
-    nutrition: calculateNutrition(latestResult.values),
-    similarAthletes: getSimilarAthletes(latestResult.values),
-  };
-
-  localStorage.setItem(resultKey, JSON.stringify(upgradedResult));
-  renderResults(upgradedResult);
+if (isCabinetHash()) {
+  showCabinet();
 } else {
-  drawMacroChart({ protein: 150, fat: 80, carbs: 390, targetCalories: 2900 });
+  hideCabinet();
 }
-
-renderNutrition(localStorage.getItem(foodKey) || "");
-renderProgress();

@@ -13,12 +13,21 @@
         <span>MacroArena</span>
       </a>
       <nav class="main-nav" aria-label="Негізгі навигация">
-        <a href="#home">Басты</a>
-        <a href="#calculator">Калькулятор</a>
-        <a href="#results">Нәтиже</a>
-        <a href="#nutrition">Рацион</a>
-        <a href="#comparison">Салыстыру</a>
-        <a href="#progress">Прогресс</a>
+        <div class="nav-links">
+          <a href="#home">Басты</a>
+          <a href="#calculator">Калькулятор</a>
+          <a href="#results">Нәтиже</a>
+          <a href="#nutrition">Рацион</a>
+          <a href="#comparison">Салыстыру</a>
+          <a href="#bigdata">Big Data</a>
+          <a href="#progress">Прогресс</a>
+        </div>
+        <div class="auth-nav-actions" aria-label="Аккаунт">
+          <button class="nav-auth-button nav-auth-primary" type="button" id="openLoginButton">Вход</button>
+          <button class="nav-auth-button" type="button" id="openRegisterButton">Регистрация</button>
+          <button class="nav-auth-button nav-auth-primary" type="button" id="openCabinetButton" hidden>Кабинет</button>
+          <button class="nav-auth-button nav-auth-danger" type="button" id="logoutButton" hidden>Выход</button>
+        </div>
       </nav>
     </header>
 
@@ -33,6 +42,7 @@
           <div class="hero-actions">
             <a class="primary-action" href="#calculator">Есептеуді бастау</a>
             <a class="ghost-action" href="#results">Нәтижені көру</a>
+            <button class="ghost-action" type="button" id="openAccountHeroButton">Кабинетке кіру</button>
           </div>
         </div>
 
@@ -75,6 +85,196 @@
           <h2>Аналитика</h2>
           <p>Нәтиже ұқсас спортшылардың орташа деректерімен салыстырылып, қысқа қорытынды беріледі.</p>
         </article>
+      </section>
+
+      <div class="auth-modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle" hidden>
+        <div class="auth-modal">
+          <button class="modal-close" type="button" id="closeLoginModal" aria-label="Закрыть">×</button>
+          <form class="auth-form" id="loginForm">
+            <div>
+              <p class="eyebrow">sign in</p>
+              <h3 id="loginTitle">Вход</h3>
+            </div>
+            <label>
+              Email
+              <input name="email" type="email" placeholder="ayan@mail.com" autocomplete="email" required>
+            </label>
+            <label>
+              Пароль
+              <input name="password" type="password" placeholder="Ваш пароль" autocomplete="current-password" required>
+            </label>
+            <button class="primary-action" type="submit">Войти</button>
+            <p class="form-note" id="loginNote" role="status"></p>
+            <button class="auth-switch" type="button" id="switchToRegister">Нет аккаунта? Зарегистрироваться</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="auth-modal-overlay" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerTitle" hidden>
+        <div class="auth-modal">
+          <button class="modal-close" type="button" id="closeRegisterModal" aria-label="Закрыть">×</button>
+          <form class="auth-form" id="registerForm">
+            <div>
+              <p class="eyebrow">sign up</p>
+              <h3 id="registerTitle">Регистрация</h3>
+            </div>
+            <label>
+              Имя
+              <input name="name" type="text" placeholder="Ayan" autocomplete="name" required>
+            </label>
+            <label>
+              Email
+              <input name="email" type="email" placeholder="ayan@mail.com" autocomplete="email" required>
+            </label>
+            <label>
+              Пароль
+              <input name="password" type="password" minlength="4" placeholder="Минимум 4 символа" autocomplete="new-password" required>
+            </label>
+            <label>
+              Повтор пароля
+              <input name="passwordRepeat" type="password" minlength="4" placeholder="Повторите пароль" autocomplete="new-password" required>
+            </label>
+            <button class="primary-action" type="submit">Зарегистрироваться</button>
+            <p class="form-note" id="registerNote" role="status"></p>
+            <button class="auth-switch" type="button" id="switchToLogin">Уже есть аккаунт? Войти</button>
+          </form>
+        </div>
+      </div>
+
+      <section id="account" class="section account-section" hidden>
+        <div class="section-heading">
+          <p class="eyebrow">personal account</p>
+          <h2 id="accountTitle">Личный кабинет</h2>
+          <p>Заполните профиль спортсмена. Данные сохраняются локально и отдельно для email текущего пользователя.</p>
+        </div>
+
+        <div class="account-shell">
+          <div class="account-hero-card">
+            <div>
+              <p class="eyebrow">saved locally</p>
+              <h3 id="accountName">Аккаунт</h3>
+              <p id="accountStatus">Данные аккаунта сохранены в localStorage этого браузера.</p>
+            </div>
+            <div class="account-actions">
+              <button class="ghost-button" type="button" id="closeCabinetButton">На сайт</button>
+              <button class="ghost-button" type="button" id="cabinetLogoutButton">Выйти</button>
+            </div>
+          </div>
+
+          <form class="profile-form" id="profileForm">
+            <label>
+              ФИО
+              <input name="fullName" type="text" placeholder="Иван Иванов" autocomplete="name">
+            </label>
+            <label>
+              Телефон
+              <input name="phone" type="tel" placeholder="+7 777 123 45 67" autocomplete="tel">
+            </label>
+            <label>
+              Город
+              <input name="city" type="text" placeholder="Алматы" autocomplete="address-level2">
+            </label>
+            <label>
+              Дата рождения
+              <input name="birthDate" type="date">
+            </label>
+            <label>
+              Пол
+              <select name="gender">
+                <option value="">Выберите</option>
+                <option value="male">Мужской</option>
+                <option value="female">Женский</option>
+                <option value="other">Не указывать</option>
+              </select>
+            </label>
+            <label>
+              Рост, см
+              <input name="height" type="number" min="120" max="230" step="0.1" placeholder="178">
+            </label>
+            <label>
+              Вес, кг
+              <input name="weight" type="number" min="30" max="220" step="0.1" placeholder="72">
+            </label>
+            <label>
+              Вид спорта
+              <select name="sport">
+                <option value="">Выберите</option>
+                <option value="football">Футбол</option>
+                <option value="boxing">Бокс</option>
+                <option value="running">Бег</option>
+                <option value="swimming">Плавание</option>
+                <option value="fitness">Фитнес</option>
+                <option value="basketball">Баскетбол</option>
+                <option value="cycling">Велоспорт</option>
+              </select>
+            </label>
+            <label>
+              Цель
+              <select name="goal">
+                <option value="">Выберите</option>
+                <option value="maintenance">Поддержание веса</option>
+                <option value="gain">Набор мышечной массы</option>
+                <option value="loss">Снижение веса</option>
+              </select>
+            </label>
+            <label>
+              Опыт тренировок
+              <select name="experience">
+                <option value="">Выберите</option>
+                <option value="beginner">Новичок</option>
+                <option value="middle">1-3 года</option>
+                <option value="advanced">3-5 лет</option>
+                <option value="pro">Более 5 лет</option>
+              </select>
+            </label>
+            <label>
+              Никнейм
+              <input name="nickname" type="text" placeholder="macro_player">
+            </label>
+            <label class="profile-wide">
+              О себе
+              <textarea name="about" rows="5" placeholder="Коротко о тренировках, режиме и целях"></textarea>
+            </label>
+            <div class="profile-actions profile-wide">
+              <button class="primary-action" type="submit">Сохранить данные</button>
+              <button class="ghost-button" type="button" id="transferProfileButton">Перенести в калькулятор</button>
+            </div>
+            <p class="form-note profile-wide" id="profileNote" role="status"></p>
+          </form>
+
+          <div class="cabinet-grid">
+            <article class="cabinet-card">
+              <span>Профиль спортсмена</span>
+              <div class="cabinet-list" id="cabinetProfile">
+                <p>Пока нет данных. Заполните форму кабинета.</p>
+              </div>
+            </article>
+            <article class="cabinet-card">
+              <span>Последний расчет</span>
+              <div class="cabinet-list" id="cabinetCalculation">
+                <p>После расчета здесь появятся калории и БЖУ.</p>
+              </div>
+            </article>
+            <article class="cabinet-card">
+              <span>Рацион</span>
+              <div class="cabinet-list" id="cabinetNutrition">
+                <p>Добавьте прием пищи, чтобы увидеть историю.</p>
+              </div>
+            </article>
+            <article class="cabinet-card">
+              <span>Прогресс</span>
+              <div class="cabinet-list" id="cabinetProgress">
+                <p>Добавьте вес, чтобы увидеть динамику.</p>
+              </div>
+            </article>
+            <article class="cabinet-card cabinet-card-wide">
+              <span>Сводка данных пользователя</span>
+              <div class="cabinet-readable-data" id="cabinetAllData">
+                <p>Данные появятся после заполнения форм.</p>
+              </div>
+            </article>
+          </div>
+        </div>
       </section>
 
       <section id="calculator" class="section split-section">
@@ -320,6 +520,80 @@
           <p id="profileSummary">Есептеуден кейін ең жақын 5 спортшы профилі көрсетіледі.</p>
         </div>
         <div class="profile-grid" id="similarProfiles"></div>
+      </section>
+
+      <section id="bigdata" class="section bigdata-section">
+        <div class="section-heading">
+          <p class="eyebrow">big data demo</p>
+          <h2>Big Data аналитика</h2>
+          <p id="bigDataSummary">
+            Сайт собирает данные профиля, калькулятора, рациона и прогресса, затем сравнивает пользователя с демо-датасетом спортсменов.
+          </p>
+        </div>
+
+        <div class="bigdata-metrics">
+          <article>
+            <span>Записей в анализе</span>
+            <strong id="bigDataRecords">--</strong>
+            <p>Демо-датасет спортсменов плюс данные текущего пользователя.</p>
+          </article>
+          <article>
+            <span>Полей пользователя</span>
+            <strong id="bigDataFields">--</strong>
+            <p>Профиль, расчет, питание и прогресс.</p>
+          </article>
+          <article>
+            <span>Похожие спортсмены</span>
+            <strong id="bigDataMatches">--</strong>
+            <p>Группа для сравнения и рекомендаций.</p>
+          </article>
+          <article>
+            <span>Средняя калорийность</span>
+            <strong id="bigDataAverageCalories">--</strong>
+            <p>Среднее значение по датасету.</p>
+          </article>
+        </div>
+
+        <div class="bigdata-layout">
+          <section class="bigdata-card">
+            <span>Как это связано с Big Data</span>
+            <div class="bigdata-pipeline">
+              <div><strong>1. Сбор</strong><p>Пользователь вводит профиль, питание, вес, спорт и цель.</p></div>
+              <div><strong>2. Хранение</strong><p>В демо данные лежат в localStorage, в реальном проекте они уходят в базу.</p></div>
+              <div><strong>3. Анализ</strong><p>JS сравнивает пользователя с большим набором похожих спортсменов.</p></div>
+              <div><strong>4. Рекомендации</strong><p>На основе средних значений выводятся калории, БЖУ и выводы.</p></div>
+            </div>
+          </section>
+
+          <section class="bigdata-card">
+            <span>Сегменты датасета</span>
+            <div class="bigdata-list" id="bigDataSegments"></div>
+          </section>
+        </div>
+
+        <div class="bigdata-card">
+          <span>Вывод по пользователю</span>
+          <p id="bigDataInsight">Заполните калькулятор, чтобы увидеть персональный вывод на основе датасета.</p>
+        </div>
+
+        <div class="bigdata-card api-card">
+          <span>Связь с API</span>
+          <form class="api-form" id="apiWeatherForm">
+            <label>
+              Город для тренировки
+              <input name="city" type="text" placeholder="Например: Almaty">
+            </label>
+            <button class="primary-action" type="submit">Получить данные из API</button>
+          </form>
+          <p id="apiWeatherStatus">API подключается к Open-Meteo: геокодинг города и текущая погода.</p>
+          <div class="api-result-grid">
+            <article><span>Город</span><strong id="apiWeatherCity">--</strong></article>
+            <article><span>Температура</span><strong id="apiWeatherTemp">--</strong></article>
+            <article><span>Ветер</span><strong id="apiWeatherWind">--</strong></article>
+            <article><span>Осадки</span><strong id="apiWeatherRain">--</strong></article>
+          </div>
+          <p id="apiWeatherAdvice">Нажмите кнопку, чтобы получить данные из внешнего API.</p>
+        </div>
       </section>
 
       <section id="progress" class="section">

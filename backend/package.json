@@ -1,0 +1,10 @@
+{
+  "name": "macroarena-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simple MacroArena backend API with SQLite",
+  "scripts": {
+    "start": "python3 src/server.py",
+    "dev": "python3 src/server.py"
+  }
+}
