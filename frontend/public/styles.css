@@ -9,6 +9,8 @@
   --cyan: #55d6ff;
   --warning: #ffd166;
   --danger: #ff7a7a;
+  --radius: 8px;
+  --radius-sm: 6px;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
 }
 
@@ -74,6 +76,7 @@ select {
   border: 1px solid rgba(109, 255, 141, 0.55);
   background: #0f201a;
   color: var(--green);
+  border-radius: var(--radius-sm);
 }
 
 .main-nav {
@@ -87,6 +90,7 @@ select {
   padding: 0.65rem 0.8rem;
   color: var(--muted);
   font-size: 0.92rem;
+  border-radius: var(--radius-sm);
 }
 
 .main-nav a:hover,
@@ -175,6 +179,7 @@ select {
   min-height: 3rem;
   padding: 0.85rem 1.2rem;
   border: 0;
+  border-radius: var(--radius);
   cursor: pointer;
   font-weight: 800;
 }
@@ -213,6 +218,7 @@ select {
 .progress-shell {
   border: 1px solid var(--line);
   background: rgba(16, 28, 24, 0.78);
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
 
@@ -229,6 +235,7 @@ select {
   background:
     linear-gradient(160deg, rgba(85, 214, 255, 0.16), transparent 50%),
     var(--surface-strong);
+  border-radius: var(--radius-sm);
 }
 
 .metric-card span,
@@ -274,6 +281,7 @@ select {
   padding: 1rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius);
 }
 
 .metric-grid strong,
@@ -355,6 +363,7 @@ select {
   background: #07110f;
   color: var(--text);
   padding: 0 0.85rem;
+  border-radius: var(--radius-sm);
 }
 
 .nutrition-form textarea {
@@ -371,12 +380,13 @@ select {
 }
 
 .preset-row button {
-  min-height: 2.4rem;
+  min-height: 2.8rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   cursor: pointer;
-  padding: 0.55rem 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius);
   font-weight: 800;
 }
 
@@ -464,6 +474,7 @@ select {
   padding: 0.9rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius);
 }
 
 .meal-layout {
@@ -508,6 +519,7 @@ select {
   padding: 0.9rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius);
 }
 
 .food-list strong,
@@ -531,6 +543,7 @@ select {
   padding: 0.8rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius);
 }
 
 .nutrition-bars span,
@@ -568,6 +581,7 @@ select {
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid var(--line);
+  border-radius: var(--radius-sm);
 }
 
 .comparison-table div:last-child {
@@ -602,6 +616,7 @@ select {
   padding: 1rem;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius);
 }
 
 .profile-grid p {
@@ -615,6 +630,7 @@ select {
   width: fit-content;
   padding: 0.35rem 0.55rem;
   border: 1px solid rgba(109, 255, 141, 0.38);
+  border-radius: var(--radius-sm);
   color: var(--green);
   font-weight: 800;
 }
